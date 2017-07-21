@@ -2,6 +2,7 @@
  * Created by Liangxiao on 17/7/6.
  */
 
+//@include "lib/json2.min.js"
 //@target photoshop
 app.preferences.rulerUnits = Units.PIXELS;
 app.bringToFront();
@@ -21,11 +22,11 @@ function savePNG(path, name, crArr) {
         y1 = UnitValue(crArr[1]).as('px'),
         x2 = UnitValue(crArr[2]).as('px'),
         y2 = UnitValue(crArr[3]).as('px');
-    var selectReg = [[x1,y1],[x2,y1],[x2,y2],[x1,y2]];
+    var selectReg = [[x1, y1], [x2, y1], [x2, y2], [x1, y2]];
     app.activeDocument.selection.select(selectReg);
     app.activeDocument.selection.copy(true);
     app.activeDocument.selection.deselect();
-    
+
     var width = x2 - x1;
     var height = y2 - y1;
     var resolution = 72;
@@ -35,24 +36,26 @@ function savePNG(path, name, crArr) {
     preferences.rulerUnits = Units.PIXELS;
     var newDocument = documents.add(width, height, resolution, docName, mode, initialFill);
     newDocument.paste();
-    
+
     var exp = new ExportOptionsSaveForWeb();
     exp.format = SaveDocumentType.PNG;
-    exp.interlaced　= false;
+    exp.interlaced = false;
     exp.PNG8 = false;
 
-    var fileObj = new File(path + name + ".png");
+    var folderImg = new Folder(path + "/images");
+    if (!folderImg.exists) {folderImg.create();}
+    var fileObj = new File(folderImg.fsName + '/' + name + ".png");
     newDocument.exportDocument(fileObj, ExportType.SAVEFORWEB, exp);
-    newDocument.close( SaveOptions.DONOTSAVECHANGES );
+    newDocument.close(SaveOptions.DONOTSAVECHANGES);
 }
 
 /* 在工作文档中处理所有复制来的图层/组，如果是图层组就先合并，然后裁切并输出 */
-function processing (exFolder) {
+function processing(exFolder) {
     var rectArr = []; // 组件名，定位和宽高
     var layers = app.activeDocument.layers;
     var len = layers.length;
     var i, j, fileIndex = 0;
-    var x1, x2, y1, y2, width, height, name, comm;
+    var x1, x2, y1, y2, width, height, name;
     var tmp, cmp, boundsArr;
     var pre = app.activeDocument.name;
     pre = pre.replace(".psd", "_");
@@ -62,7 +65,7 @@ function processing (exFolder) {
         }
         fileIndex++;
         boundsArr = layers[i].bounds;
-        cmp = app.activeDocument.layerComps.add("快照", "", true, true, true);
+        cmp = app.activeDocument.layerComps.add("快照", "", true, true, true); // 使用图层复合做备份
         x1 = UnitValue(boundsArr[0]).as('px');
         y1 = UnitValue(boundsArr[1]).as('px');
         x2 = UnitValue(boundsArr[2]).as('px');
@@ -70,12 +73,7 @@ function processing (exFolder) {
         width = x2 - x1;
         height = y2 - y1;
         name = 'page_' + pre + zeroSuppress(fileIndex, 3);
-        comm = layers[i].name;
-        comm.replace(/[:\/\\*\?\"\<\>\|]/g, "_"); // 非法字符处理
-        if (comm.length > 6) { // 留6个字
-            comm = comm.substring(0, 6);
-        }
-        rectArr.push({"name": name, "comm": comm, "x": x1, "y": y1, "w": width, "h": height});
+        rectArr.push({ "name": name, "x": x1, "y": y1, "w": width, "h": height });
         tmp = layers[i].duplicate(app.activeDocument, ElementPlacement.PLACEATBEGINNING); // 复制图层并移动到当前文档的layers[0]位置
         if (tmp.typename == "LayerSet") {
             layers[0].merge();
@@ -83,10 +81,10 @@ function processing (exFolder) {
         for (j = 1; j < layers.length; j++) {
             layers[j].visible = false;
         }
-        savePNG(exFolder + "\\", name, boundsArr);
-        
+        savePNG(exFolder + "/", name, boundsArr);
+
         layers[0].remove();
-        cmp.apply();
+        cmp.apply(); // 还原并删除备份
         cmp.remove();
     }
     return rectArr;
@@ -94,48 +92,80 @@ function processing (exFolder) {
 
 /* 构建并输出js配置文件 */
 function exportJS(rectArr, exFolder) {
-    var jsOut = new File(exFolder + "\\config.js");
-    jsOut.encoding = "UTF-8"; // 指定编码
-    jsOut.open(jsOut.exists ? "a" : "w", "TEXT", "????"); // 后俩参数是留给Mac的，Windows无用
+    var jsOut = new File(exFolder + "/config.json");
+    jsOut.encoding = "UTF-8"; // 强制指定编码
 
-    var len = rectArr.length;
+    var text = ""; // 待写入内容的字符串
+    var textBody = null; // 待写入内容缓存
+    var domTips = 0;
 
-    var text = '';
-    var imgName = '';
-    var imgNameTmp = '';
-    var domName = '';
-    var domNameTmp = '';
-    var index = 1;
-    var pre = app.activeDocument.name;
-    pre = pre.replace(".psd", "");
+    if (!jsOut.exists) { // 如果指定的路径没有config.js文件
+        jsOut.open("w"); // 写入模式
 
-    for (var i = 0; i < len; i++) {
-        imgNameTmp = "\t\t\t" + "\"images/" + rectArr[index-1].name + ".png\",\r\n";
-        imgName += imgNameTmp;
-        imgNameTmp = '';
+        // config.js初始模板
+        textBody = {
+            appName: "",
+            baseUrl: "",
+            para: "",
+            cdnPre: "",
+            images: [],
+            res: [],
+            loading: {},
+            pages: [
+                {
+                    id: "",
+                    animation: [],
+                    rect: { x: 0, y: 0 },
+                    display: "none",
+                    bgImg: "",
+                    dom: []
+                }
+            ]
+        }
 
-        domNameTmp = rectArr[index-1].comm;
-        domNameTmp = "\t\t\t\t" + "{type:\"img\", src:\"images/" + rectArr[index-1].name + ".png\", rect:{x:" + rectArr[index-1].x + ", y:" + rectArr[index-1].y + ", w:" + rectArr[index-1].w + ", h:" + rectArr[index-1].h + "}, comment:\"" + domNameTmp + "\", time:0, wait:0, animates:\"\"},\r\n";
-        domName += domNameTmp;
-        index += 1;
+    } else { // 反之如果路径中存在config.js文件
+
+        jsOut.open("e"); // 编辑模式
+        text = jsOut.read();
+        textBody = JSON.parse(text);
+        domTips = textBody.pages.length;
+        textBody.pages.push({
+            id: "",
+            animation: [],
+            rect: { x: 0, y: 0 },
+            display: "none",
+            bgImg: "",
+            dom: []
+        });
+
     }
 
-    text += "\r\nvar config = {\r\n";
-    text += "\tbasic: {\r\n";
-    text += "\t\timages: [\r\n";
-    text += imgName;
-    text += "\t\t],\r\n";
-    text += "\t},\r\n";
-    text += "\tpages: [\r\n";
-    text += "\t\t{\r\n";
-    text += "\t\t\tid:\"page_" + pre + "\",\r\n";
-    text += "\t\t\tanimation:[],\r\n";
-    text += "\t\t\trect:{x:0,y:0},\r\n";
-    text += "\t\t\tdisplay:\"none\",\r\n";
-    text += "\t\t\tdom:[\r\n";
-    text += domName;
-    text += "\t\t\t]\r\n\t\t},\r\n";
-    text += "\t]\r\n};\r\n";
+    var pre = app.activeDocument.name;
+    pre = pre.replace(".psd", "");
+    textBody.pages[domTips].id = "page_" + pre;
+
+    var domTmp = {};
+    var len = rectArr.length;
+
+    for (var i = 0; i < len; i++) {
+        textBody.images.push("images/" + rectArr[i].name + ".png");
+        domTmp = {
+            type: "img",
+            rect: {
+                x: rectArr[i].x,
+                y: rectArr[i].y,
+                w: rectArr[i].w,
+                h: rectArr[i].h
+            },
+            src: "images/" + rectArr[i].name + ".png",
+            time: 0,
+            wait: 0,
+            animates: ""
+        }
+        textBody.pages[domTips].dom.push(domTmp);
+    }
+
+    text = JSON.stringify(textBody);
 
     // 写入到文本文件里
     jsOut.write(text);
@@ -146,18 +176,18 @@ function exportJS(rectArr, exFolder) {
 }
 
 /* 主进程，出弹框提示选择输出路径，执行处理过程，完成后播放提示音 */
-function Main () {
+function Main() {
     try {
-        var exFolder = Folder.selectDialog ("请选择输出文件夹");
+        var exFolder = Folder.selectDialog("请选择输出文件夹");
         if (exFolder != null) {
-            var rect = processing (exFolder.fsName);
+            var rect = processing(exFolder.fsName);
             exportJS(rect, exFolder.fsName);
             app.beep(); //成功后播放提示音
         } else {
             alert("文件夹选择有误！");
         }
-    } catch(e) {
-        $.writeln ("!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
+    } catch (e) {
+        $.writeln("!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
         alert("抱歉！执行时发生错误！");
     }
 }
