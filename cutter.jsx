@@ -82,7 +82,7 @@ function processing(exFolder) {
             layers[j].visible = false;
         }
         savePNG(exFolder + "/", name, boundsArr);
-
+        
         layers[0].remove();
         cmp.apply(); // 还原并删除备份
         cmp.remove();
@@ -126,6 +126,7 @@ function exportJS(rectArr, exFolder) {
     } else { // 反之如果路径中存在config.js文件
 
         jsOut.open("e"); // 编辑模式
+        jsOut.seek(0, 0);
         text = jsOut.read();
         textBody = JSON.parse(text);
         domTips = textBody.pages.length;
@@ -137,7 +138,7 @@ function exportJS(rectArr, exFolder) {
             bgImg: "",
             dom: []
         });
-
+        jsOut.open("w");
     }
 
     var pre = app.activeDocument.name;
@@ -187,8 +188,8 @@ function Main() {
             alert("文件夹选择有误！");
         }
     } catch (e) {
-        $.writeln("!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
-        alert("抱歉！执行时发生错误！");
+        // $.writeln("!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
+        alert("抱歉！执行时发生错误！\r\n" + "!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
     }
 }
 
