@@ -211,7 +211,7 @@ function Main() {
             alert("文件夹选择有误！");
         }
     } catch (e) {
-        // $.writeln("!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
+        $.writeln("!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
         alert("抱歉！执行时发生错误！\r\n" + "!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
     }
 }
