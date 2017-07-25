@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Created by Liangxiao on 17/7/6.
  */
 
@@ -43,7 +43,7 @@ function savePNG(path, name, crArr) {
     exp.PNG8 = false;
 
     var folderImg = new Folder(path + "/images");
-    if (!folderImg.exists) {folderImg.create();}
+    if (!folderImg.exists) { folderImg.create(); }
     var fileObj = new File(folderImg.fsName + '/' + name + ".png");
     newDocument.exportDocument(fileObj, ExportType.SAVEFORWEB, exp);
     newDocument.close(SaveOptions.DONOTSAVECHANGES);
@@ -82,7 +82,7 @@ function processing(exFolder) {
             layers[j].visible = false;
         }
         savePNG(exFolder + "/", name, boundsArr);
-        
+
         layers[0].remove();
         cmp.apply(); // 还原并删除备份
         cmp.remove();
@@ -90,7 +90,7 @@ function processing(exFolder) {
     return rectArr;
 }
 
-/* 构建并输出js配置文件 */
+/* 构建并输出json配置文件 */
 function exportJS(rectArr, exFolder) {
     var jsOut = new File(exFolder + "/config.json");
     jsOut.encoding = "UTF-8"; // 强制指定编码
@@ -102,7 +102,7 @@ function exportJS(rectArr, exFolder) {
     if (!jsOut.exists) { // 如果指定的路径没有config.js文件
         jsOut.open("w"); // 写入模式
 
-        // config.js初始模板
+        // config初始模板
         textBody = {
             appName: "",
             baseUrl: "",
@@ -123,21 +123,43 @@ function exportJS(rectArr, exFolder) {
             ]
         }
 
-    } else { // 反之如果路径中存在config.js文件
+    } else { // 反之如果路径中存在config.json文件
 
         jsOut.open("e"); // 编辑模式
         jsOut.seek(0, 0);
         text = jsOut.read();
-        textBody = JSON.parse(text);
-        domTips = textBody.pages.length;
-        textBody.pages.push({
-            id: "",
-            animation: [],
-            rect: { x: 0, y: 0 },
-            display: "none",
-            bgImg: "",
-            dom: []
-        });
+        if (text !== '') { // 如果config.json意外为空时
+            textBody = JSON.parse(text);
+            domTips = textBody.pages.length;
+            textBody.pages.push({
+                id: "",
+                animation: [],
+                rect: { x: 0, y: 0 },
+                display: "none",
+                bgImg: "",
+                dom: []
+            });
+        } else {
+            textBody = {
+                appName: "",
+                baseUrl: "",
+                para: "",
+                cdnPre: "",
+                images: [],
+                res: [],
+                loading: {},
+                pages: [
+                    {
+                        id: "",
+                        animation: [],
+                        rect: { x: 0, y: 0 },
+                        display: "none",
+                        bgImg: "",
+                        dom: []
+                    }
+                ]
+            }
+        }
         jsOut.open("w");
     }
 
@@ -166,7 +188,8 @@ function exportJS(rectArr, exFolder) {
         textBody.pages[domTips].dom.push(domTmp);
     }
 
-    text = JSON.stringify(textBody);
+    text = JSON.stringify(textBody, null, 4);
+    text = text.replace(/(\[|\{)\s*(?=\]|\})/g, '$1'); // 替换掉空元素里的空白部分
 
     // 写入到文本文件里
     jsOut.write(text);
