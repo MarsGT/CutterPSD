@@ -57,8 +57,8 @@ function processing(exFolder) {
     var i, j, fileIndex = 0;
     var x1, x2, y1, y2, width, height, name;
     var tmp, cmp, boundsArr;
-    var pre = app.activeDocument.name;
-    pre = pre.replace(".psd", "");
+    var psdName = app.activeDocument.name;
+    psdName = psdName.replace(".psd", "");
     for (i = 0; i < len; i++) {
         if (!layers[i].visible) { // 跳过隐藏图层
             continue;
@@ -81,7 +81,7 @@ function processing(exFolder) {
         for (j = 1; j < layers.length; j++) {
             layers[j].visible = false;
         }
-        savePNG(exFolder + "/" + pre + "/", name, boundsArr);
+        savePNG(exFolder + "/" + psdName + "/", name, boundsArr);
 
         layers[0].remove();
         cmp.apply(); // 还原并删除备份
@@ -125,11 +125,11 @@ function exportJSON(rectArr, exFolder) {
 
     var imageTmp = {};
     var len = rectArr.length;
-    var pre = app.activeDocument.name;
-    pre = pre.replace(".psd", "_");
+    var psdName = app.activeDocument.name;
+    psdName = psdName.replace(".psd", "");
 
     for (var i = 0; i < len; i++) {
-        textBody.res.push(pre + "/" + rectArr[i].name + ".png");
+        textBody.res.push(psdName + "/" + rectArr[i].name + ".png");
         imageTmp = {
             name: rectArr[i].name,
             rect: {
