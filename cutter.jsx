@@ -73,7 +73,7 @@ function processing(exFolder) {
         width = x2 - x1;
         height = y2 - y1;
         name = 'item_' + pre + zeroSuppress(fileIndex, 3);
-        rectArr.push({ "name": name, "x": ~~((x2 - x1) / 2), "y": ~~((y2 - y1) / 2), "w": width, "h": height });
+        rectArr.push({ "name": name, "x": (x1 + ~~(width / 2)), "y": (y1 + ~~(height / 2)), "w": width, "h": height });
         tmp = layers[i].duplicate(app.activeDocument, ElementPlacement.PLACEATBEGINNING); // 复制图层并移动到当前文档的layers[0]位置
         if (tmp.typename == "LayerSet") {
             layers[0].merge();
