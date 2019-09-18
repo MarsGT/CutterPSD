@@ -72,8 +72,8 @@ function processing(exFolder) {
         y2 = UnitValue(boundsArr[3]).as('px');
         width = x2 - x1;
         height = y2 - y1;
-        name = 'page_' + pre + zeroSuppress(fileIndex, 3);
-        rectArr.push({ "name": name, "x": x1, "y": y1, "w": width, "h": height });
+        name = 'item_' + pre + zeroSuppress(fileIndex, 3);
+        rectArr.push({ "name": name, "x": ~~((x2 - x1) / 2), "y": ~~((y2 - y1) / 2), "w": width, "h": height });
         tmp = layers[i].duplicate(app.activeDocument, ElementPlacement.PLACEATBEGINNING); // 复制图层并移动到当前文档的layers[0]位置
         if (tmp.typename == "LayerSet") {
             layers[0].merge();
@@ -91,101 +91,54 @@ function processing(exFolder) {
 }
 
 /* 构建并输出json配置文件 */
-function exportJS(rectArr, exFolder) {
+function exportJSON(rectArr, exFolder) {
     var jsOut = new File(exFolder + "/config.json");
     jsOut.encoding = "UTF-8"; // 强制指定编码
 
     var text = ""; // 待写入内容的字符串
     var textBody = null; // 待写入内容缓存
-    var domTips = 0;
 
     if (!jsOut.exists) { // 如果指定的路径没有config.js文件
         jsOut.open("w"); // 写入模式
 
         // config初始模板
         textBody = {
-            appName: "",
-            baseUrl: "",
-            para: "",
-            cdnPre: "",
-            images: [],
             res: [],
-            loading: {},
-            pages: [
-                {
-                    id: "",
-                    animation: [],
-                    rect: { x: 0, y: 0 },
-                    display: "none",
-                    bgImg: "",
-                    dom: []
-                }
-            ]
+            images: []
         }
 
-    } else { // 反之如果路径中存在config.json文件
+    } else { // 反之如果路径中存在config.json文件(更新模式)
 
         jsOut.open("e"); // 编辑模式
         jsOut.seek(0, 0);
         text = jsOut.read();
-        if (text !== '') { // 如果config.json意外为空时
+        if (text !== '') { // 如果config.json不为空
             textBody = JSON.parse(text);
-            domTips = textBody.pages.length;
-            textBody.pages.push({
-                id: "",
-                animation: [],
-                rect: { x: 0, y: 0 },
-                display: "none",
-                bgImg: "",
-                dom: []
-            });
         } else {
             textBody = {
-                appName: "",
-                baseUrl: "",
-                para: "",
-                cdnPre: "",
-                images: [],
                 res: [],
-                loading: {},
-                pages: [
-                    {
-                        id: "",
-                        animation: [],
-                        rect: { x: 0, y: 0 },
-                        display: "none",
-                        bgImg: "",
-                        dom: []
-                    }
-                ]
+                images: []
             }
         }
         jsOut.open("w");
     }
 
-    var pre = app.activeDocument.name;
-    pre = pre.replace(".psd", "");
-    textBody.pages[domTips].id = "page_" + pre;
-
-    var domTmp = {};
+    var imageTmp = {};
     var len = rectArr.length;
 
     for (var i = 0; i < len; i++) {
-        textBody.images.push("images/" + rectArr[i].name + ".png");
-        domTmp = {
-            type: "img",
+        textBody.res.push("images/" + rectArr[i].name + ".png");
+        imageTmp = {
+            name: rectArr[i].name,
             rect: {
                 x: rectArr[i].x,
                 y: rectArr[i].y,
-                w: rectArr[i].w,
-                h: rectArr[i].h
+                width: rectArr[i].w,
+                height: rectArr[i].h
             },
-            src: "images/" + rectArr[i].name + ".png",
-            time: 0,
-            wait: 0,
-            animates: ""
+            src: "images/" + rectArr[i].name + ".png"
         }
-        textBody.pages[domTips].dom.push(domTmp);
+        textBody.images.push(imageTmp);
     }
 
     text = JSON.stringify(textBody, null, 4);
@@ -205,7 +158,7 @@ function Main() {
         var exFolder = Folder.selectDialog("请选择输出文件夹");
         if (exFolder != null) {
             var rect = processing(exFolder.fsName);
-            exportJS(rect, exFolder.fsName);
+            exportJSON(rect, exFolder.fsName);
             app.beep(); //成功后播放提示音
         } else {
             alert("文件夹选择有误！");
