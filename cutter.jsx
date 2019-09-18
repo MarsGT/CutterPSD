@@ -42,7 +42,7 @@ function savePNG(path, name, crArr) {
     exp.interlaced = false;
     exp.PNG8 = false;
 
-    var folderImg = new Folder(path + "/images");
+    var folderImg = new Folder(path);
     if (!folderImg.exists) { folderImg.create(); }
     var fileObj = new File(folderImg.fsName + '/' + name + ".png");
     newDocument.exportDocument(fileObj, ExportType.SAVEFORWEB, exp);
@@ -58,7 +58,7 @@ function processing(exFolder) {
     var x1, x2, y1, y2, width, height, name;
     var tmp, cmp, boundsArr;
     var pre = app.activeDocument.name;
-    pre = pre.replace(".psd", "_");
+    pre = pre.replace(".psd", "");
     for (i = 0; i < len; i++) {
         if (!layers[i].visible) { // 跳过隐藏图层
             continue;
@@ -72,7 +72,7 @@ function processing(exFolder) {
         y2 = UnitValue(boundsArr[3]).as('px');
         width = x2 - x1;
         height = y2 - y1;
-        name = 'item_' + pre + zeroSuppress(fileIndex, 3);
+        name = 'item_' + zeroSuppress(fileIndex, 3);
         rectArr.push({ "name": name, "x": (x1 + ~~(width / 2)), "y": (y1 + ~~(height / 2)), "w": width, "h": height });
         tmp = layers[i].duplicate(app.activeDocument, ElementPlacement.PLACEATBEGINNING); // 复制图层并移动到当前文档的layers[0]位置
         if (tmp.typename == "LayerSet") {
@@ -81,7 +81,7 @@ function processing(exFolder) {
         for (j = 1; j < layers.length; j++) {
             layers[j].visible = false;
         }
-        savePNG(exFolder + "/", name, boundsArr);
+        savePNG(exFolder + "/" + pre + "/", name, boundsArr);
 
         layers[0].remove();
         cmp.apply(); // 还原并删除备份
@@ -125,9 +125,11 @@ function exportJSON(rectArr, exFolder) {
 
     var imageTmp = {};
     var len = rectArr.length;
+    var pre = app.activeDocument.name;
+    pre = pre.replace(".psd", "_");
 
     for (var i = 0; i < len; i++) {
-        textBody.res.push("images/" + rectArr[i].name + ".png");
+        textBody.res.push(pre + "/" + rectArr[i].name + ".png");
         imageTmp = {
             name: rectArr[i].name,
             rect: {
@@ -135,8 +137,7 @@ function exportJSON(rectArr, exFolder) {
                 y: rectArr[i].y,
                 width: rectArr[i].w,
                 height: rectArr[i].h
-            },
-            src: "images/" + rectArr[i].name + ".png"
+            }
         }
         textBody.images.push(imageTmp);
     }
