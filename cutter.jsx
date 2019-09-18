@@ -92,14 +92,14 @@ function processing(exFolder) {
 
 /* 构建并输出json配置文件 */
 function exportJSON(rectArr, exFolder) {
-    var jsOut = new File(exFolder + "/config.json");
-    jsOut.encoding = "UTF-8"; // 强制指定编码
+    var jsonOut = new File(exFolder + "/config.json");
+    jsonOut.encoding = "UTF-8"; // 强制指定编码
 
     var text = ""; // 待写入内容的字符串
     var textBody = null; // 待写入内容缓存
 
-    if (!jsOut.exists) { // 如果指定的路径没有config.js文件
-        jsOut.open("w"); // 写入模式
+    if (!jsonOut.exists) { // 如果指定的路径没有config.json文件
+        jsonOut.open("w"); // 写入模式
 
         // config初始模板
         textBody = {
@@ -109,9 +109,9 @@ function exportJSON(rectArr, exFolder) {
 
     } else { // 反之如果路径中存在config.json文件(更新模式)
 
-        jsOut.open("e"); // 编辑模式
-        jsOut.seek(0, 0);
-        text = jsOut.read();
+        jsonOut.open("e"); // 编辑模式
+        jsonOut.seek(0, 0);
+        text = jsonOut.read();
         if (text !== '') { // 如果config.json不为空
             textBody = JSON.parse(text);
         } else {
@@ -120,7 +120,7 @@ function exportJSON(rectArr, exFolder) {
                 images: []
             }
         }
-        jsOut.open("w");
+        jsonOut.open("w");
     }
 
     var imageTmp = {};
@@ -146,6 +146,39 @@ function exportJSON(rectArr, exFolder) {
     text = text.replace(/(\[|\{)\s*(?=\]|\})/g, '$1'); // 替换掉空元素里的空白部分
 
     // 写入到文本文件里
+    jsonOut.write(text);
+
+    //文件写入成功后，关闭文件的输入流。
+    jsonOut.close();
+
+}
+
+// 直接输出js代码
+function exportJS(rectArr, exFolder) {
+    var psdName = app.activeDocument.name;
+    psdName = psdName.replace(".psd", "");
+
+    var jsOut = new File(exFolder + "/" + psdName + ".js");
+    jsOut.encoding = "UTF-8"; // 强制指定编码
+
+    var text = ""; // 待写入内容的字符串
+    var textBody = []; // 待写入内容缓存
+
+    if (!jsOut.exists) { // 如果指定的路径没有config.js文件
+        jsOut.open("w"); // 写入模式
+    }
+
+    var imageTmp = "";
+    var len = rectArr.length;
+
+    for (var i = 0; i < len; i++) {
+        imageTmp = "this." + rectArr[i].name + " = this.add.sprite(" + rectArr[i].x + ", " + rectArr[i].y + ", '" + psdName + "_" + rectArr[i].name + "')";
+        textBody.push(imageTmp);
+    }
+
+    text = textBody.join('\n');
+
+    // 写入到文本文件里
     jsOut.write(text);
 
     //文件写入成功后，关闭文件的输入流。
@@ -160,6 +193,7 @@ function Main() {
         if (exFolder != null) {
             var rect = processing(exFolder.fsName);
             exportJSON(rect, exFolder.fsName);
+            exportJS(rect, exFolder.fsName);
             app.beep(); //成功后播放提示音
         } else {
             alert("文件夹选择有误！");
