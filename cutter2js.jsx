@@ -90,66 +90,37 @@ function processing(exFolder) {
     return rectArr;
 }
 
-/* 构建并输出json配置文件 */
-function exportJSON(rectArr, exFolder) {
-    var jsonOut = new File(exFolder + "/config.json");
-    jsonOut.encoding = "UTF-8"; // 强制指定编码
-
-    var text = ""; // 待写入内容的字符串
-    var textBody = null; // 待写入内容缓存
-
-    if (!jsonOut.exists) { // 如果指定的路径没有config.json文件
-        jsonOut.open("w"); // 写入模式
-
-        // config初始模板
-        textBody = {
-            res: [],
-            images: []
-        }
-
-    } else { // 反之如果路径中存在config.json文件(更新模式)
-
-        jsonOut.open("e"); // 编辑模式
-        jsonOut.seek(0, 0);
-        text = jsonOut.read();
-        if (text !== '') { // 如果config.json不为空
-            textBody = JSON.parse(text);
-        } else {
-            textBody = {
-                res: [],
-                images: []
-            }
-        }
-        jsonOut.open("w");
-    }
-
-    var imageTmp = {};
-    var len = rectArr.length;
+// 直接输出js代码
+function exportJS(rectArr, exFolder) {
     var psdName = app.activeDocument.name;
     psdName = psdName.replace(".psd", "");
 
-    for (var i = 0; i < len; i++) {
-        textBody.res.push(psdName + "/" + rectArr[i].name + ".png");
-        imageTmp = {
-            name: rectArr[i].name,
-            rect: {
-                x: rectArr[i].x,
-                y: rectArr[i].y,
-                width: rectArr[i].w,
-                height: rectArr[i].h
-            }
-        }
-        textBody.images.push(imageTmp);
+    var jsOut = new File(exFolder + "/" + psdName + ".js");
+    jsOut.encoding = "UTF-8"; // 强制指定编码
+
+    var text = "var " + psdName + " = new Phaser.Scene('" + psdName + "')\n" + psdName + ".create = function () {\n"; // 待写入内容的字符串
+    var textBody = []; // 待写入内容缓存
+
+    if (!jsOut.exists) { // 如果指定的路径没有config.js文件
+        jsOut.open("w"); // 写入模式
     }
 
-    text = JSON.stringify(textBody, null, 4);
-    text = text.replace(/(\[|\{)\s*(?=\]|\})/g, '$1'); // 替换掉空元素里的空白部分
+    var imageTmp = "";
+    var len = rectArr.length;
+
+    for (var i = 0; i < len; i++) {
+        imageTmp = "\tthis." + rectArr[i].name + " = this.add.sprite(" + rectArr[i].x + ", " + rectArr[i].y + ", '" + psdName + "_" + rectArr[i].name + "')";
+        textBody.push(imageTmp);
+    }
+
+    text += textBody.join('\n');
+    text += "\n}\n";
 
     // 写入到文本文件里
-    jsonOut.write(text);
+    jsOut.write(text);
 
     //文件写入成功后，关闭文件的输入流。
-    jsonOut.close();
+    jsOut.close();
 
 }
 
@@ -159,7 +130,7 @@ function Main() {
         var exFolder = Folder.selectDialog("请选择输出文件夹");
         if (exFolder != null) {
             var rect = processing(exFolder.fsName);
-            exportJSON(rect, exFolder.fsName);
+            exportJS(rect, exFolder.fsName);
             app.beep(); //成功后播放提示音
         } else {
             alert("文件夹选择有误！");
