@@ -100,32 +100,52 @@ function exportHTML(rectArr, exFolder) {
     psdName = psdName.replace(".psd", "");
     var ordNum = psdName.match(/\d/g).join(""); // 序数
 
-    var jsOut = new File(exFolder + "/" + psdName + ".html");
-    jsOut.encoding = "UTF-8"; // 强制指定编码
+    // 第一输出目标
+    var htmlOut1 = new File(exFolder + "/" + psdName + ".html");
+    htmlOut1.encoding = "UTF-8"; // 强制指定编码
+    if (!htmlOut1.exists) { // 如果指定的路径没有相应文件
+        htmlOut1.open("w"); // 写入模式
+    }
+
+    // 第二输出目标
+    var htmlOut2 = new File(exFolder + "/all.html");
+    htmlOut2.encoding = "UTF-8";
+    if (!htmlOut2.exists) { // 如果指定路径没有
+        htmlOut2.open("w"); // 写入模式
+    } else {
+        htmlOut2.open("a"); // 追加模式
+    }
 
     var text = "<section class='swiper page" + ordNum + "'>\n\t<div class='pageZoom'>\n"; // 待写入内容的字符串
     var textBody = []; // 待写入内容缓存
 
-    if (!jsOut.exists) { // 如果指定的路径没有相应文件
-        jsOut.open("w"); // 写入模式
-    }
-
     var imageTmp = "";
     var len = rectArr.length;
+    var animateLib = ["fadeInDown", "fadeInLeft", "fadeInUp", "fadeInRight", "slideInDown", "slideInLeft", "slideInUp", "slideInRight", "zoomIn"]
 
     for (var i = 0; i < len; i++) {
-        imageTmp = "\t\t<img class='imgBase' src='assets/page/" + psdName + '_' + rectArr[i].name + ".png' style='left:" + rectArr[i].x + "px;top:" + rectArr[i].y + "px;'>";
+        imageTmp = "\t\t<img class='imgBase' src='assets/page/" + psdName + '_' + rectArr[i].name + ".png' style='left:" + rectArr[i].x + "px;top:" + rectArr[i].y + "px;'\n";
+        imageTmp += "\t\t\tswiper-animate-effect='";
+        imageTmp += animateLib[~~(Math.random() * animateLib.length)]; // 随机一种动画效果
+        imageTmp += "' swiper-animate-duration='0.3s' swiper-animate-delay='0s'>";
         textBody.push(imageTmp);
     }
+    textBody.reverse(); // 颠倒顺序,按自然层级排列
 
     text += textBody.join('\n');
-    text += "\n\t</div>\n</section>\n";
+    text += "\n\t</div>\n";
+    text += "\t<div class='pageZoom2'>\n";
+    text += "\t\t<img class='imgBase' data-touch='return' src='assets/list/header.png'\n\t\t\tstyle='left:0;top:0;pointer-events:all;'>\n";
+    text += "\t</div>\n";
+    text += "</section>\n";
 
     // 写入到文本文件里
-    jsOut.write(text);
+    htmlOut1.write(text);
+    htmlOut2.write(text);
 
     //文件写入成功后，关闭文件的输入流。
-    jsOut.close();
+    htmlOut1.close();
+    htmlOut2.close();
 
 }
 
