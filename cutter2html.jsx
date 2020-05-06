@@ -116,7 +116,7 @@ function exportHTML(rectArr, exFolder) {
         htmlOut2.open("a"); // 追加模式
     }
 
-    var text = "<section class='swiper page" + ordNum + "'>\n\t<div class='pageZoom'>\n"; // 待写入内容的字符串
+    var text = "<section class='swiper-slide page" + ordNum + "'>\n\t<div class='pageZoom'>\n"; // 待写入内容的字符串
     var textBody = []; // 待写入内容缓存
 
     var imageTmp = "";
@@ -124,18 +124,16 @@ function exportHTML(rectArr, exFolder) {
     var animateLib = ["fadeInDown", "fadeInLeft", "fadeInUp", "fadeInRight", "slideInDown", "slideInLeft", "slideInUp", "slideInRight", "zoomIn"]
 
     for (var i = 0; i < len; i++) {
-        imageTmp = "\t\t<img class='imgBase' src='assets/page/" + psdName + '_' + rectArr[i].name + ".png' style='left:" + rectArr[i].x + "px;top:" + rectArr[i].y + "px;'\n";
+        imageTmp = "\t\t<img class='imgBase swiper-lazy' data-src='assets/page/" + psdName + '_' + rectArr[i].name + ".png' style='left:" + rectArr[i].x + "px;top:" + rectArr[i].y + "px;'\n";
         imageTmp += "\t\t\tswiper-animate-effect='";
         imageTmp += animateLib[~~(Math.random() * animateLib.length)]; // 随机一种动画效果
-        imageTmp += "' swiper-animate-duration='0.3s' swiper-animate-delay='0s'>";
+        imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>";
         textBody.push(imageTmp);
     }
     textBody.reverse(); // 颠倒顺序,按自然层级排列
 
     text += textBody.join('\n');
-    text += "\n\t</div>\n";
-    text += "\t<div class='pageZoom2'>\n";
-    text += "\t\t<img class='imgBase' data-touch='return' src='assets/list/header.png'\n\t\t\tstyle='left:0;top:0;pointer-events:all;'>\n";
+    text += "\n\t\t<img class='imgBase' data-touch='return' src='assets/list/header.png'\n\t\t\tstyle='left:0;top:0;pointer-events:all;'>\n";
     text += "\t</div>\n";
     text += "</section>\n";
 
