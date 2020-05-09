@@ -116,6 +116,7 @@ function exportJS(rectArr, exFolder) {
         imageTmp = "\tthis." + rectArr[i].name + " = this.add.sprite(" + rectArr[i].cx + ", " + rectArr[i].cy + ", '" + psdName + "_" + rectArr[i].name + "')";
         textBody.push(imageTmp);
     }
+    textBody.reverse(); // 颠倒顺序,按自然层级排列
 
     text += textBody.join('\n');
     text += "\n}\n";
