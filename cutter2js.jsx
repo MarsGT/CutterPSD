@@ -83,7 +83,11 @@ function processing(exFolder) {
         }
         savePNG(exFolder + "/" + psdName + "/", name, boundsArr);
 
-        layers[0].remove();
+        try {
+            layers[0].remove();
+        } catch (e) {
+            
+        }
         cmp.apply(); // 还原并删除备份
         cmp.remove();
     }
