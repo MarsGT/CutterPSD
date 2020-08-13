@@ -161,6 +161,7 @@ function Main() {
             var rect = processing(exFolder.fsName);
             exportJSON(rect, exFolder.fsName);
             app.beep(); //成功后播放提示音
+            app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
         } else {
             alert("文件夹选择有误！");
         }

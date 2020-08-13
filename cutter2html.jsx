@@ -98,7 +98,6 @@ function processing(exFolder) {
 function exportHTML(rectArr, exFolder) {
     var psdName = app.activeDocument.name;
     psdName = psdName.replace(".psd", "");
-    var ordNum = psdName.match(/\d/g).join(""); // 序数
 
     // 第一输出目标
     var htmlOut1 = new File(exFolder + "/" + psdName + ".html");
@@ -116,7 +115,7 @@ function exportHTML(rectArr, exFolder) {
         htmlOut2.open("a"); // 追加模式
     }
 
-    var text = "<section class='swiper-slide page" + ordNum + "'>\n\t<div class='pageZoom'>\n"; // 待写入内容的字符串
+    var text = "<section class='swiper-slide'>\n\t<div class='pageZoom'>\n"; // 待写入内容的字符串
     var textBody = []; // 待写入内容缓存
 
     var imageTmp = "";
@@ -155,6 +154,7 @@ function Main() {
             var rect = processing(exFolder.fsName);
             exportHTML(rect, exFolder.fsName);
             app.beep(); //成功后播放提示音
+            app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
         } else {
             alert("文件夹选择有误！");
         }
