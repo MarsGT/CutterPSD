@@ -55,7 +55,7 @@ function processing(exFolder) {
     var layers = app.activeDocument.layers;
     var len = layers.length;
     var i, j, fileIndex = 0;
-    var x1, x2, y1, y2, width, height, name;
+    var x1, x2, y1, y2, width, height, name, layerName;
     var tmp, cmp, boundsArr;
     var psdName = app.activeDocument.name;
     psdName = psdName.replace(".psd", "");
@@ -63,7 +63,6 @@ function processing(exFolder) {
         if (!layers[i].visible) { // 跳过隐藏图层
             continue;
         }
-        fileIndex++;
         boundsArr = layers[i].bounds;
         cmp = app.activeDocument.layerComps.add("快照", "", true, true, true); // 使用图层复合做备份
         x1 = UnitValue(boundsArr[0]).as('px');
@@ -72,16 +71,41 @@ function processing(exFolder) {
         y2 = UnitValue(boundsArr[3]).as('px');
         width = x2 - x1;
         height = y2 - y1;
-        name = 'item_' + zeroSuppress(fileIndex, 3);
-        rectArr.push({ "name": name, "x": x1, "y": y1, "cx": (x1 + ~~(width / 2)), "cy": (y1 + ~~(height / 2)), "w": width, "h": height });
-        tmp = layers[i].duplicate(app.activeDocument, ElementPlacement.PLACEATBEGINNING); // 复制图层并移动到当前文档的layers[0]位置
-        if (tmp.typename == "LayerSet") {
-            layers[0].merge();
+        layerName = layers[i].name
+        switch (layerName) {
+            case "[LIMIT]":
+                name = 'COMMON';
+                break;
+            case "[EXCLU]":
+                name = 'COMMON';
+                break;
+            case "[ONLY]":
+                name = 'COMMON';
+                break;
+            case "[NEW]":
+                name = 'COMMON';
+                break;
+            default:
+                fileIndex++;
+                name = 'item_' + zeroSuppress(fileIndex, 3);
         }
+        rectArr.push({ "name": name, "layerName": layerName, "x": x1, "y": y1, "cx": (x1 + ~~(width / 2)), "cy": (y1 + ~~(height / 2)), "w": width, "h": height });
+        tmp = layers[i].duplicate(app.activeDocument, ElementPlacement.PLACEATBEGINNING); // 复制图层并移动到当前文档的layers[0]位置
         for (j = 1; j < layers.length; j++) {
             layers[j].visible = false;
         }
-        savePNG(exFolder + "/" + psdName + "/", psdName + '_' + name, boundsArr);
+        switch (layerName) {
+            case "[LIMIT]":
+                break;
+            case "[EXCLU]":
+                break;
+            case "[ONLY]":
+                break;
+            case "[NEW]":
+                break;
+            default:
+                savePNG(exFolder + "/item/", psdName + '_' + name, boundsArr);
+        }
 
         try {
             layers[0].remove();
@@ -123,16 +147,62 @@ function exportHTML(rectArr, exFolder) {
     var animateLib = ["fadeInDown", "fadeInLeft", "fadeInUp", "fadeInRight", "slideInDown", "slideInLeft", "slideInUp", "slideInRight", "zoomIn"]
 
     for (var i = 0; i < len; i++) {
-        imageTmp = "\t\t<img class='imgBase swiper-lazy' data-src='assets/page/" + psdName + '_' + rectArr[i].name + ".png' style='left:" + rectArr[i].x + "px;top:" + rectArr[i].y + "px;'\n";
-        imageTmp += "\t\t\tswiper-animate-effect='";
-        imageTmp += animateLib[~~(Math.random() * animateLib.length)]; // 随机一种动画效果
-        imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>";
+        imageTmp = "\t\t<img class='imgBase swiper-lazy";
+        if (rectArr[i].layerName !== "[BG]") {
+            imageTmp += " ani";
+        }
+        switch (rectArr[i].layerName) {
+            case "[LIMIT]":
+                imageTmp += " infinite' data-src='";
+                imageTmp += "assets/common/limit.png";
+                break;
+            case "[EXCLU]":
+                imageTmp += " infinite' data-src='";
+                imageTmp += "assets/common/exclu.png";
+                break;
+            case "[ONLY]":
+                imageTmp += " infinite' data-src='";
+                imageTmp += "assets/common/only.png";
+                break;
+            case "[NEW]":
+                imageTmp += " infinite' data-src='";
+                imageTmp += "assets/common/new.png";
+                break;
+            default:
+                imageTmp += "' data-src='";
+                imageTmp += "assets/item/" + psdName + '_' + rectArr[i].name + ".png";
+                break;
+        }
+        imageTmp += "' style='left:" + rectArr[i].x + "px;top:" + rectArr[i].y + "px;'";
+        if (rectArr[i].layerName !== "[BG]") {
+            imageTmp += "\n\t\t\tswiper-animate-effect='";
+            switch (rectArr[i].layerName) {
+                case "[flipInX]":
+                    imageTmp += "flipInX";
+                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0.3s'>";
+                    break;
+                case "[LIMIT]":
+                case "[EXCLU]":
+                case "[ONLY]":
+                case "[NEW]":
+                    imageTmp += "tada"
+                    imageTmp += "' swiper-animate-duration='1.0s' swiper-animate-delay='0.8s'>";
+                    break;
+                default:
+                    imageTmp += animateLib[~~(Math.random() * animateLib.length)]; // 随机一种动画效果
+                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>";
+                    break;
+            }
+        } else {
+            imageTmp += ">"
+        }
         textBody.push(imageTmp);
     }
     textBody.reverse(); // 颠倒顺序,按自然层级排列
 
     text += textBody.join('\n');
-    text += "\n\t\t<img class='imgBase' data-touch='return' src='assets/list/header.png'\n\t\t\tstyle='left:0;top:0;pointer-events:all;'>\n";
+    text += "\n\t\t<img class='imgBase' src='assets/common/header.png' style='left:0;top:0;'>\n";
+    text += "\t\t<img class='imgBase' data-touch='return' src='assets/common/btnGoback.png' style='left:72px;top:150px;pointer-events:all;'>\n";
     text += "\t</div>\n";
     text += "</section>\n";
 
