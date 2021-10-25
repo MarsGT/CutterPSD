@@ -123,23 +123,16 @@ function exportHTML(rectArr, exFolder) {
     var psdName = app.activeDocument.name;
     psdName = psdName.replace(".psd", "");
 
-    // 第一输出目标
-    var htmlOut1 = new File(exFolder + "/" + psdName + ".html");
-    htmlOut1.encoding = "UTF-8"; // 强制指定编码
-    if (!htmlOut1.exists) { // 如果指定的路径没有相应文件
-        htmlOut1.open("w"); // 写入模式
-    }
-
-    // 第二输出目标
-    var htmlOut2 = new File(exFolder + "/all.html");
-    htmlOut2.encoding = "UTF-8";
-    if (!htmlOut2.exists) { // 如果指定路径没有
-        htmlOut2.open("w"); // 写入模式
+    // 输出目标
+    var htmlOut = new File(exFolder + "/all.html");
+    htmlOut.encoding = "UTF-8";
+    if (!htmlOut.exists) { // 如果指定路径没有
+        htmlOut.open("w"); // 写入模式
     } else {
-        htmlOut2.open("a"); // 追加模式
+        htmlOut.open("a"); // 追加模式
     }
 
-    var text = "<section class='swiper-slide'>\n\t<div class='pageZoom'>\n"; // 待写入内容的字符串
+    var text = "<section class='swiper-slide' style='overflow:hidden;' data-header>\n\t<div class='pageZoom'>\n"; // 待写入内容的字符串
     var textBody = []; // 待写入内容缓存
 
     var imageTmp = "";
@@ -148,37 +141,55 @@ function exportHTML(rectArr, exFolder) {
 
     for (var i = 0; i < len; i++) {
         imageTmp = "\t\t<img class='imgBase swiper-lazy";
-        if (rectArr[i].layerName !== "[BG]") {
-            imageTmp += " ani";
-        }
         switch (rectArr[i].layerName) {
             case "[LIMIT]":
-                imageTmp += " infinite' data-src='";
+                imageTmp += " ani infinite' data-src='";
                 imageTmp += "assets/common/limit.png";
                 break;
             case "[EXCLU]":
-                imageTmp += " infinite' data-src='";
+                imageTmp += " ani infinite' data-src='";
                 imageTmp += "assets/common/exclu.png";
                 break;
             case "[ONLY]":
-                imageTmp += " infinite' data-src='";
+                imageTmp += " ani infinite' data-src='";
                 imageTmp += "assets/common/only.png";
                 break;
             case "[NEW]":
-                imageTmp += " infinite' data-src='";
+                imageTmp += " ani infinite' data-src='";
                 imageTmp += "assets/common/new.png";
                 break;
-            default:
+            case "[NoAni]":
                 imageTmp += "' data-src='";
                 imageTmp += "assets/item/" + psdName + '_' + rectArr[i].name + ".png";
                 break;
+            default:
+                imageTmp += " ani' data-src='";
+                imageTmp += "assets/item/" + psdName + '_' + rectArr[i].name + ".png";
+                break;
         }
-        imageTmp += "' style='left:" + rectArr[i].x + "px;top:" + rectArr[i].y + "px;'";
-        if (rectArr[i].layerName !== "[BG]") {
+        imageTmp += "' style='left:" + rectArr[i].x + "px;top:" + rectArr[i].y + "px;";
+        if (rectArr[i].layerName === '[pointer]') {
+            imageTmp += "pointer-events:auto;'"
+        } else {
+            imageTmp += "'"
+        }
+        if ((rectArr[i].layerName !== "[Header]") && (rectArr[i].layerName !== "[NoAni]")) {
             imageTmp += "\n\t\t\tswiper-animate-effect='";
             switch (rectArr[i].layerName) {
-                case "[flipInX]":
+                case "[Ani:flipInX]":
                     imageTmp += "flipInX";
+                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0.3s'>";
+                    break;
+                case "[Ani:fadeIn]":
+                    imageTmp += "fadeIn";
+                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>";
+                    break;
+                case "[Ani:fadeInUp]":
+                    imageTmp += "fadeInUp";
+                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>";
+                    break;
+                case "[Ani:tada]":
+                    imageTmp += "tada";
                     imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0.3s'>";
                     break;
                 case "[LIMIT]":
@@ -198,21 +209,15 @@ function exportHTML(rectArr, exFolder) {
         }
         textBody.push(imageTmp);
     }
+    textBody.push("\t\t<img class='imgBase swiper-lazy' data-src='assets/common/header.png' style='left:0;top:0;'>")
     textBody.reverse(); // 颠倒顺序,按自然层级排列
 
     text += textBody.join('\n');
-    text += "\n\t\t<img class='imgBase' src='assets/common/header.png' style='left:0;top:0;'>\n";
-    text += "\t\t<img class='imgBase' data-touch='return' src='assets/common/btnGoback.png' style='left:72px;top:150px;pointer-events:all;'>\n";
-    text += "\t</div>\n";
-    text += "</section>\n";
+    text += "\n\t</div>\n</section>\n";
 
-    // 写入到文本文件里
-    htmlOut1.write(text);
-    htmlOut2.write(text);
-
-    //文件写入成功后，关闭文件的输入流。
-    htmlOut1.close();
-    htmlOut2.close();
+    // 写入文本文件, 成功后关闭文件的输入流。
+    htmlOut.write(text);
+    htmlOut.close();
 
 }
 
