@@ -29,12 +29,9 @@ function savePNG(path, name, crArr) {
 
     var width = x2 - x1;
     var height = y2 - y1;
-    var resolution = 72;
-    var docName = "切图用临时文档";
-    var mode = NewDocumentMode.RGB;
-    var initialFill = DocumentFill.TRANSPARENT;
+    var DocName = "切图用临时文档";
     preferences.rulerUnits = Units.PIXELS;
-    var newDocument = documents.add(width, height, resolution, docName, mode, initialFill);
+    var newDocument = documents.add(width, height, 72, DocName, NewDocumentMode.RGB, DocumentFill.TRANSPARENT);
     newDocument.paste();
 
     var exp = new ExportOptionsSaveForWeb();
@@ -57,8 +54,7 @@ function processing(exFolder) {
     var i, j, fileIndex = 0;
     var x1, x2, y1, y2, width, height, name, layerName;
     var tmp, cmp, boundsArr;
-    var psdName = app.activeDocument.name;
-    psdName = psdName.replace(".psd", "");
+    var psdName = app.activeDocument.name.replace(".psd", "");
     for (i = 0; i < len; i++) {
         if (!layers[i].visible) { // 跳过隐藏图层
             continue;
@@ -96,11 +92,8 @@ function processing(exFolder) {
         }
         switch (layerName) {
             case "[LIMIT]":
-                break;
             case "[EXCLU]":
-                break;
             case "[ONLY]":
-                break;
             case "[NEW]":
                 break;
             default:
@@ -120,9 +113,7 @@ function processing(exFolder) {
 
 // 直接输出html代码
 function exportHTML(rectArr, exFolder) {
-    var psdName = app.activeDocument.name;
-    psdName = psdName.replace(".psd", "");
-
+    var psdName = app.activeDocument.name.replace(".psd", "");
     // 输出目标
     var htmlOut = new File(exFolder + "/all.html");
     htmlOut.encoding = "UTF-8";
@@ -209,6 +200,7 @@ function exportHTML(rectArr, exFolder) {
         }
         textBody.push(imageTmp);
     }
+    textBody.push("\t\t<img class='imgBase swiper-lazy' data-src='assets/common/goback.png' style='left:72px;top:147px;pointer-events:all;' data-goback>")
     textBody.push("\t\t<img class='imgBase swiper-lazy' data-src='assets/common/header.png' style='left:0;top:0;'>")
     textBody.reverse(); // 颠倒顺序,按自然层级排列
 
