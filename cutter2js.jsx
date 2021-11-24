@@ -102,7 +102,7 @@ function exportJS(rectArr, exFolder) {
     var jsOut = new File(exFolder + "/" + psdName + ".js");
     jsOut.encoding = "UTF-8"; // 强制指定编码
 
-    var text = "var " + psdName + " = new Phaser.Scene('" + psdName + "')\n" + psdName + ".create = function () {\n"; // 待写入内容的字符串
+    var text = "const " + psdName + " = new Phaser.Scene('" + psdName + "')\n" + psdName + ".create = function () {\n"; // 待写入内容的字符串
     var textBody = []; // 待写入内容缓存
 
     if (!jsOut.exists) { // 如果指定的路径没有config.js文件
@@ -113,7 +113,7 @@ function exportJS(rectArr, exFolder) {
     var len = rectArr.length;
 
     for (var i = 0; i < len; i++) {
-        imageTmp = "\tthis." + rectArr[i].name + " = this.add.sprite(" + rectArr[i].cx + ", " + rectArr[i].cy + ", '" + psdName + "_" + rectArr[i].name + "')";
+        imageTmp = "\tthis." + rectArr[i].name + " = this.add.image(" + rectArr[i].cx + ", " + rectArr[i].cy + ", '" + psdName + "_" + rectArr[i].name + "')";
         textBody.push(imageTmp);
     }
     textBody.reverse(); // 颠倒顺序,按自然层级排列
