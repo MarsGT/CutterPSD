@@ -73,7 +73,7 @@ function processing(exFolder) {
         width = x2 - x1;
         height = y2 - y1;
         name = 'item_' + zeroSuppress(fileIndex, 3);
-        rectArr.push({ "name": name, "x": x1, "y": y1, "cx": (x1 + ~~(width / 2)), "cy": (y1 + ~~(height / 2)), "w": width, "h": height });
+        rectArr.push({ "n": name, "l": layers[i].name, "x": x1, "y": y1, "cx": (x1 + ~~(width / 2)), "cy": (y1 + ~~(height / 2)), "w": width, "h": height });
         tmp = layers[i].duplicate(app.activeDocument, ElementPlacement.PLACEATBEGINNING); // 复制图层并移动到当前文档的layers[0]位置
         if (tmp.typename == "LayerSet") {
             layers[0].merge();
@@ -102,7 +102,7 @@ function exportJS(rectArr, exFolder) {
     var jsOut = new File(exFolder + "/" + psdName + ".js");
     jsOut.encoding = "UTF-8"; // 强制指定编码
 
-    var text = "const " + psdName + " = new Phaser.Scene('" + psdName + "')\n" + psdName + ".create = function () {\n"; // 待写入内容的字符串
+    var text = "const " + psdName + " = new Phaser.Scene('" + psdName + "')\n\n" + psdName + ".create = function () {\n"; // 待写入内容的字符串
     var textBody = []; // 待写入内容缓存
 
     if (!jsOut.exists) { // 如果指定的路径没有config.js文件
@@ -113,7 +113,7 @@ function exportJS(rectArr, exFolder) {
     var len = rectArr.length;
 
     for (var i = 0; i < len; i++) {
-        imageTmp = "\tthis." + rectArr[i].name + " = this.add.image(" + rectArr[i].cx + ", " + rectArr[i].cy + ", '" + psdName + "_" + rectArr[i].name + "')";
+        imageTmp = "\tthis.add.image(" + rectArr[i].cx + ", " + rectArr[i].cy + ", '" + psdName + "_" + rectArr[i].l + "')";
         textBody.push(imageTmp);
     }
     textBody.reverse(); // 颠倒顺序,按自然层级排列
