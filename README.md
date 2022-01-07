@@ -21,12 +21,14 @@
 2. 运行后会出现提示选择输出文件夹的对话框，选择输出的文件夹，之后脚本会开始运行。
 
 
-## 关于 cutter 以及 cutter2xxx 脚本的简单介绍
+## 关于脚本功能的简单介绍
 
 默认为 cutter.jsx 脚本，会进行切图以及生成 config.json 配置文件(内容为图片大小及定位信息)
 除了默认的 cutter.jsx 脚本外，本项目额外增加了两个cutter2...脚本，其中：
-   - cutter2js.jsx 主要用于生成适合 Phaser3 引擎使用的 Scene 的 js 文件；
-   - cutter2html.jsx 主要用于生成适合 Swiper5 使用的 HTML 模板。
+   - cutter2js.jsx 用于生成适合 Phaser3 引擎使用的 Scene 的 js 文件
+   - cutter2html.jsx 用于生成适合 Swiper5 使用的 HTML 模板
+   - cutter2svg.jsx 用于生成多个 image 组合式的 SVG 图片
+还附带有一个 exportText.jsx 文件，用于将当前选中的文本图层中的文字内容导出到 TXT 文件。
 
 
 ## 关于 exportText.jsx 脚本的简单介绍
