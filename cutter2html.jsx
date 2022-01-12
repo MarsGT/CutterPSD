@@ -4,89 +4,75 @@
 
 //@include "lib/json2.min.js"
 //@target photoshop
-app.preferences.rulerUnits = Units.PIXELS;
-app.bringToFront();
+app.preferences.rulerUnits = Units.PIXELS
+app.bringToFront()
 
 /* 全局文档名 */
 var psdName = app.activeDocument.name.replace(".psd", "")
 
 /* 生成指定位数的序列号（填充0） */
 function zeroSuppress(num, digit) {
-    var tmp = num.toString();
+    var tmp = num.toString()
     while (tmp.length < digit) {
-        tmp = "0" + tmp;
+        tmp = "0" + tmp
     }
-    return tmp;
+    return tmp
 }
 
 /* 存储PNG */
-function savePNG(path, name, crArr) {
-    var x1 = UnitValue(crArr[0]).as('px'),
-        y1 = UnitValue(crArr[1]).as('px'),
-        x2 = UnitValue(crArr[2]).as('px'),
-        y2 = UnitValue(crArr[3]).as('px');
-    var selectReg = [[x1, y1], [x2, y1], [x2, y2], [x1, y2]];
-    app.activeDocument.selection.select(selectReg);
-    app.activeDocument.selection.copy(true);
-    app.activeDocument.selection.deselect();
+function savePNG(path, name, imgConf) {
+    var selectReg = [
+        [imgConf.x1, imgConf.y1],
+        [imgConf.x2, imgConf.y1],
+        [imgConf.x2, imgConf.y2],
+        [imgConf.x1, imgConf.y2]
+    ]
+    app.activeDocument.selection.select(selectReg)
+    app.activeDocument.selection.copy(true)
+    app.activeDocument.selection.deselect()
 
-    var width = x2 - x1;
-    var height = y2 - y1;
-    var DocName = "切图用临时文档";
-    preferences.rulerUnits = Units.PIXELS;
-    var newDocument = documents.add(width, height, 72, DocName, NewDocumentMode.RGB, DocumentFill.TRANSPARENT);
-    newDocument.paste();
+    var DocName = "切图用临时文档"
+    preferences.rulerUnits = Units.PIXELS
+    var newDocument = documents.add(imgConf.width, imgConf.height, 72, DocName, NewDocumentMode.RGB, DocumentFill.TRANSPARENT)
+    newDocument.paste()
 
-    var exp = new ExportOptionsSaveForWeb();
-    exp.format = SaveDocumentType.PNG;
-    exp.interlaced = false;
-    exp.PNG8 = false;
+    var exp = new ExportOptionsSaveForWeb()
+    exp.format = SaveDocumentType.PNG
+    exp.interlaced = false
+    exp.PNG8 = false
 
-    var folderImg = new Folder(path);
-    if (!folderImg.exists) { folderImg.create(); }
-    var fileObj = new File(folderImg.fsName + '/' + name + ".png");
-    newDocument.exportDocument(fileObj, ExportType.SAVEFORWEB, exp);
-    newDocument.close(SaveOptions.DONOTSAVECHANGES);
+    var folderImg = new Folder(path)
+    if (!folderImg.exists) { folderImg.create() }
+    var fileObj = new File(folderImg.fsName + '/' + name + ".png")
+    newDocument.exportDocument(fileObj, ExportType.SAVEFORWEB, exp)
+    newDocument.close(SaveOptions.DONOTSAVECHANGES)
 }
 
 /* 在工作文档中处理所有复制来的图层/组，如果是图层组就先合并，然后裁切并输出 */
 function processing(exFolder) {
-    var rectArr = []; // 组件名，定位和宽高
-    var layers = app.activeDocument.layers;
-    var len = layers.length;
-    var i, j, fileIndex = 0;
-    var x1, x2, y1, y2, width, height, name, layerName;
-    var cmp, boundsArr;
+    var rectArr = [] // 组件信息数组，包含名称、定位和宽高
+    var layers = app.activeDocument.layers
+    var len = layers.length
+    var i, j, fileIndex = 0
+    var x1, x2, y1, y2, width, height, name, layerName
+    var cmp, boundsArr
     for (i = 0; i < len; i++) {
-        if (!layers[i].visible) { // 跳过隐藏图层
-            continue;
+        if (!layers[i].visible) { // 直接跳过隐藏图层
+            continue
         }
-        boundsArr = layers[i].bounds;
-        cmp = app.activeDocument.layerComps.add("快照", "", true, true, true); // 使用图层复合做备份
-        x1 = UnitValue(boundsArr[0]).as('px');
-        y1 = UnitValue(boundsArr[1]).as('px');
-        x2 = UnitValue(boundsArr[2]).as('px');
-        y2 = UnitValue(boundsArr[3]).as('px');
-        width = x2 - x1;
-        height = y2 - y1;
+        boundsArr = layers[i].bounds
         layerName = layers[i].name
-        switch (layerName) {
-            case "[LIMIT]":
-                name = 'COMMON';
-                break;
-            case "[EXCLU]":
-                name = 'COMMON';
-                break;
-            case "[ONLY]":
-                name = 'COMMON';
-                break;
-            case "[NEW]":
-                name = 'COMMON';
-                break;
-            default:
-                fileIndex++;
-                name = 'item_' + zeroSuppress(fileIndex, 3);
-        }
+        cmp = app.activeDocument.layerComps.add("快照", "", true, true, true) // 使用图层复合做备份
+        x1 = UnitValue(boundsArr[0]).as('px')
+        y1 = UnitValue(boundsArr[1]).as('px')
+        x2 = UnitValue(boundsArr[2]).as('px')
+        y2 = UnitValue(boundsArr[3]).as('px')
+        width = x2 - x1
+        height = y2 - y1
+        // 文件名
+        fileIndex++
+        name = 'item_' + zeroSuppress(fileIndex, 3)
+        // 压入组件信息数组
         rectArr.push({
             name: name,
             layerName: layerName,
@@ -96,147 +82,124 @@ function processing(exFolder) {
             cy: (y1 + ~~(height / 2)),
             w: width,
             h: height
-        });
-        layers[i].duplicate(app.activeDocument, ElementPlacement.PLACEATBEGINNING); // 复制图层并移动到当前文档的layers[0]位置
+        })
+        layers[i].duplicate(app.activeDocument, ElementPlacement.PLACEATBEGINNING) // 复制图层并移动到当前文档的layers[0]位置
         for (j = 1; j < layers.length; j++) {
-            layers[j].visible = false;
+            layers[j].visible = false
         }
-        switch (layerName) {
-            case "[LIMIT]":
-            case "[EXCLU]":
-            case "[ONLY]":
-            case "[NEW]":
-                break;
-            default:
-                savePNG(exFolder + "/item/", psdName + '_' + name, boundsArr);
-        }
-
+        savePNG(exFolder + "/item/", psdName + '_' + name, {
+            x1: x1,
+            y1: y1,
+            x2: x2,
+            y2: y2,
+            width: width,
+            height: height
+        })
+        // 避免运行脚本时没有选中的图层时会报错
         try {
-            layers[0].remove();
+            layers[0].remove()
         } catch (e) {
             
         }
-        cmp.apply(); // 还原并删除备份
-        cmp.remove();
+        cmp.apply() // 还原并删除备份
+        cmp.remove()
     }
-    return rectArr;
+    return rectArr
 }
 
 // 直接输出html代码
 function exportHTML(rectArr, exFolder) {
     // 输出目标
-    var htmlOut = new File(exFolder + "/all.html");
-    htmlOut.encoding = "UTF-8";
+    var htmlOut = new File(exFolder + "/all.html")
+    htmlOut.encoding = "UTF-8"
     if (!htmlOut.exists) { // 如果指定路径没有
-        htmlOut.open("w"); // 写入模式
+        htmlOut.open("w") // 写入模式
     } else {
-        htmlOut.open("a"); // 追加模式
+        htmlOut.open("a") // 追加模式
     }
 
-    var text = "<section class='swiper-slide' style='overflow:hidden;' data-header>\n\t<div class='pageZoom'>\n"; // 待写入内容的字符串
-    var textBody = []; // 待写入内容缓存
+    var text = "<section class='swiper-slide' style='overflow:hidden;' data-header>\n\t<div class='pageZoom'>\n" // 待写入内容的字符串
+    var textBody = [] // 待写入内容缓存
 
-    var imageTmp = "";
-    var len = rectArr.length;
+    var imageTmp = ""
+    var len = rectArr.length
     var animateLib = ["fadeInDown", "fadeInLeft", "fadeInUp", "fadeInRight", "slideInDown", "slideInLeft", "slideInUp", "slideInRight", "zoomIn"]
 
     for (var i = 0; i < len; i++) {
-        imageTmp = "\t\t<img class='imgBase swiper-lazy";
+        imageTmp = "\t\t<img class='imgBase swiper-lazy"
         switch (rectArr[i].layerName) {
-            case "[LIMIT]":
-                imageTmp += " ani infinite' data-src='";
-                imageTmp += "assets/common/limit.png";
-                break;
-            case "[EXCLU]":
-                imageTmp += " ani infinite' data-src='";
-                imageTmp += "assets/common/exclu.png";
-                break;
-            case "[ONLY]":
-                imageTmp += " ani infinite' data-src='";
-                imageTmp += "assets/common/only.png";
-                break;
-            case "[NEW]":
-                imageTmp += " ani infinite' data-src='";
-                imageTmp += "assets/common/new.png";
+            case "[icon]":
+                imageTmp += " ani infinite' data-src='"
                 break;
             case "[NoAni]":
-                imageTmp += "' data-src='";
-                imageTmp += "assets/item/" + psdName + '_' + rectArr[i].name + ".png";
+                imageTmp += "' data-src='"
                 break;
             default:
-                imageTmp += " ani' data-src='";
-                imageTmp += "assets/item/" + psdName + '_' + rectArr[i].name + ".png";
+                imageTmp += " ani' data-src='"
                 break;
         }
-        imageTmp += "' style='left:" + rectArr[i].x + "px;top:" + rectArr[i].y + "px;";
+        imageTmp += "assets/item/" + psdName + '_' + rectArr[i].name + ".png"
+        imageTmp += "' style='left:" + rectArr[i].x + "px;top:" + rectArr[i].y + "px;"
         if (rectArr[i].layerName === '[pointer]') {
             imageTmp += "pointer-events:auto;'"
         } else {
             imageTmp += "'"
         }
-        if ((rectArr[i].layerName !== "[Header]") && (rectArr[i].layerName !== "[NoAni]")) {
-            imageTmp += "\n\t\t\tswiper-animate-effect='";
+        if (rectArr[i].layerName !== "[NoAni]") {
+            imageTmp += "\n\t\t\tswiper-animate-effect='"
             switch (rectArr[i].layerName) {
                 case "[Ani:flipInX]":
-                    imageTmp += "flipInX";
-                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0.3s'>";
-                    break;
+                    imageTmp += "flipInX"
+                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0.3s'>"
+                    break
                 case "[Ani:fadeIn]":
-                    imageTmp += "fadeIn";
-                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>";
-                    break;
+                    imageTmp += "fadeIn"
+                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>"
+                    break
                 case "[Ani:fadeInUp]":
                     imageTmp += "fadeInUp";
-                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>";
-                    break;
-                case "[Ani:tada]":
-                    imageTmp += "tada";
-                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0.3s'>";
-                    break;
-                case "[LIMIT]":
-                case "[EXCLU]":
-                case "[ONLY]":
-                case "[NEW]":
+                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>"
+                    break
+                case "[icon]":
                     imageTmp += "tada"
-                    imageTmp += "' swiper-animate-duration='1.0s' swiper-animate-delay='0.8s'>";
-                    break;
+                    imageTmp += "' swiper-animate-duration='1.0s' swiper-animate-delay='0.8s'>"
+                    break
                 default:
-                    imageTmp += animateLib[~~(Math.random() * animateLib.length)]; // 随机一种动画效果
-                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>";
-                    break;
+                    imageTmp += animateLib[~~(Math.random() * animateLib.length)] // 随机一种动画效果
+                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>"
+                    break
             }
         } else {
             imageTmp += ">"
         }
-        textBody.push(imageTmp);
+        textBody.push(imageTmp)
     }
     textBody.push("\t\t<img class='imgBase swiper-lazy' data-src='assets/common/goback.png' style='left:72px;top:147px;pointer-events:all;' data-goback>")
     textBody.push("\t\t<img class='imgBase swiper-lazy' data-src='assets/common/header.png' style='left:0;top:0;'>")
     textBody.reverse(); // 颠倒顺序,按自然层级排列
 
-    text += textBody.join('\n');
-    text += "\n\t</div>\n</section>\n";
+    text += textBody.join('\n')
+    text += "\n\t</div>\n</section>\n"
 
     // 写入文本文件, 成功后关闭文件的输入流。
-    htmlOut.write(text);
-    htmlOut.close();
-
+    htmlOut.write(text)
+    htmlOut.close()
 }
 
 /* 主进程，出弹框提示选择输出路径，执行处理过程，完成后播放提示音 */
 ;(function () {
     try {
-        var exFolder = Folder.selectDialog("请选择输出文件夹");
+        var exFolder = Folder.selectDialog("请选择输出文件夹")
         if (exFolder != null) {
-            var rect = processing(exFolder.fsName);
-            exportHTML(rect, exFolder.fsName);
+            var rect = processing(exFolder.fsName)
+            exportHTML(rect, exFolder.fsName)
             app.beep(); //成功后播放提示音
-            app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
+            app.activeDocument.close(SaveOptions.DONOTSAVECHANGES)
         } else {
-            alert("文件夹选择有误！");
+            alert("文件夹选择有误！")
         }
     } catch (e) {
-        $.writeln("!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
-        alert("抱歉！执行时发生错误！\r\n" + "!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
+        $.writeln("!!" + e.name + '-> Line ' + e.line + ': ' + e.message)
+        alert("抱歉！执行时发生错误！\r\n" + "!!" + e.name + '-> Line ' + e.line + ': ' + e.message)
     }
 })();
