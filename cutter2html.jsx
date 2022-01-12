@@ -7,6 +7,9 @@
 app.preferences.rulerUnits = Units.PIXELS;
 app.bringToFront();
 
+/* 全局文档名 */
+var psdName = app.activeDocument.name.replace(".psd", "")
+
 /* 生成指定位数的序列号（填充0） */
 function zeroSuppress(num, digit) {
     var tmp = num.toString();
@@ -53,8 +56,7 @@ function processing(exFolder) {
     var len = layers.length;
     var i, j, fileIndex = 0;
     var x1, x2, y1, y2, width, height, name, layerName;
-    var tmp, cmp, boundsArr;
-    var psdName = app.activeDocument.name.replace(".psd", "");
+    var cmp, boundsArr;
     for (i = 0; i < len; i++) {
         if (!layers[i].visible) { // 跳过隐藏图层
             continue;
@@ -85,8 +87,17 @@ function processing(exFolder) {
                 fileIndex++;
                 name = 'item_' + zeroSuppress(fileIndex, 3);
         }
-        rectArr.push({ "name": name, "layerName": layerName, "x": x1, "y": y1, "cx": (x1 + ~~(width / 2)), "cy": (y1 + ~~(height / 2)), "w": width, "h": height });
-        tmp = layers[i].duplicate(app.activeDocument, ElementPlacement.PLACEATBEGINNING); // 复制图层并移动到当前文档的layers[0]位置
+        rectArr.push({
+            name: name,
+            layerName: layerName,
+            x: x1,
+            y: y1,
+            cx: (x1 + ~~(width / 2)),
+            cy: (y1 + ~~(height / 2)),
+            w: width,
+            h: height
+        });
+        layers[i].duplicate(app.activeDocument, ElementPlacement.PLACEATBEGINNING); // 复制图层并移动到当前文档的layers[0]位置
         for (j = 1; j < layers.length; j++) {
             layers[j].visible = false;
         }
@@ -113,7 +124,6 @@ function processing(exFolder) {
 
 // 直接输出html代码
 function exportHTML(rectArr, exFolder) {
-    var psdName = app.activeDocument.name.replace(".psd", "");
     // 输出目标
     var htmlOut = new File(exFolder + "/all.html");
     htmlOut.encoding = "UTF-8";
@@ -214,7 +224,7 @@ function exportHTML(rectArr, exFolder) {
 }
 
 /* 主进程，出弹框提示选择输出路径，执行处理过程，完成后播放提示音 */
-function Main() {
+;(function () {
     try {
         var exFolder = Folder.selectDialog("请选择输出文件夹");
         if (exFolder != null) {
@@ -229,6 +239,4 @@ function Main() {
         $.writeln("!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
         alert("抱歉！执行时发生错误！\r\n" + "!!" + e.name + '-> Line ' + e.line + ': ' + e.message);
     }
-}
-
-Main();
+})();
