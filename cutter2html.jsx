@@ -151,23 +151,23 @@ function exportHTML(rectArr, exFolder) {
                 case "[Ani:flipInX]":
                     imageTmp += "flipInX"
                     imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0.3s'>"
-                    break
+                    break;
                 case "[Ani:fadeIn]":
                     imageTmp += "fadeIn"
                     imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>"
-                    break
+                    break;
                 case "[Ani:fadeInUp]":
                     imageTmp += "fadeInUp";
                     imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>"
-                    break
+                    break;
                 case "[icon]":
                     imageTmp += "tada"
                     imageTmp += "' swiper-animate-duration='1.0s' swiper-animate-delay='0.8s'>"
-                    break
+                    break;
                 default:
                     imageTmp += animateLib[~~(Math.random() * animateLib.length)] // 随机一种动画效果
                     imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>"
-                    break
+                    break;
             }
         } else {
             imageTmp += ">"
