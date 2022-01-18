@@ -7,14 +7,7 @@
 app.preferences.rulerUnits = Units.PIXELS
 app.bringToFront()
 
-/* 生成指定位数的序列号（填充0） */
-function zeroSuppress(num, digit) {
-    var tmp = num.toString()
-    while (tmp.length < digit) {
-        tmp = "0" + tmp
-    }
-    return tmp
-}
+var psdName = app.activeDocument.name.replace(".psd", "")
 
 /* 存储PNG */
 function savePNG(path, name, crArr) {
@@ -56,8 +49,6 @@ function processing(exFolder) {
     var len = layers.length
     var i, j, x1, x2, y1, y2, width, height, name
     var tmp, cmp, boundsArr
-    var psdName = app.activeDocument.name
-    psdName = psdName.replace(".psd", "")
     for (i = 0; i < len; i++) {
         if (!layers[i].visible) { // 跳过隐藏图层
             continue
@@ -102,9 +93,6 @@ function processing(exFolder) {
 
 // 直接输出js代码
 function exportJS(rectArr, exFolder) {
-    var psdName = app.activeDocument.name
-    psdName = psdName.replace(".psd", "")
-
     var jsOut = new File(exFolder + "/" + psdName + ".js")
     jsOut.encoding = "UTF-8" // 强制指定编码
 
