@@ -2,7 +2,6 @@
  * Created by Liangxiao on 22/1/6.
  */
 
-//@include 'lib/json2.min.js'
 //@target photoshop
 app.preferences.rulerUnits = Units.PIXELS
 app.bringToFront()
@@ -12,7 +11,7 @@ var processing = function () {
     var layers = app.activeDocument.layers
     var len = layers.length
     var rectArr = [] // 组件名，定位和宽高
-    var i, j, boundsArr, cmp, x1, x2, y1
+    var i, j, boundsArr, cmp, x1, x2, y1, y2
     for (i = 0; i < len; i++) {
         if (!layers[i].visible) { // 跳过隐藏图层
             continue;
@@ -46,15 +45,15 @@ var processing = function () {
     return rectArr
 }
 
-// 直接输出html代码
-var exportHTML = function (rectArr, exFolder) {
+// 直接输出SVG代码
+var exportSVG = function (rectArr, exFolder) {
     // 输出目标
-    var htmlOut = new File(exFolder + '/img.svg')
-    htmlOut.encoding = 'UTF-8'
-    if (!htmlOut.exists) { // 如果指定路径没有
-        htmlOut.open('w') // 写入模式
+    var svgOut = new File(exFolder + '/output.svg')
+    svgOut.encoding = 'UTF-8'
+    if (!svgOut.exists) { // 如果指定路径没有
+        svgOut.open('w') // 写入模式
     } else {
-        htmlOut.open('a') // 追加模式
+        svgOut.open('a') // 追加模式
     }
 
     var textBody = [] // 待写入内容缓存
@@ -62,9 +61,10 @@ var exportHTML = function (rectArr, exFolder) {
     var tmp = ''
 
     for (var i = 0; i < len; i++) {
-        tmp = '<image xlink:href={'
+        tmp = '<image xlink:href="images/'
         tmp += rectArr[i].layerName
-        tmp += '} x="'
+        tmp += '.png'
+        tmp += '" x="'
         tmp += rectArr[i].x
         tmp += '" y="'
         tmp += rectArr[i].y
@@ -78,18 +78,18 @@ var exportHTML = function (rectArr, exFolder) {
     // 处理头尾
     var docWidth = UnitValue(app.activeDocument.width).as('px'),
         docHeight = UnitValue(app.activeDocument.height).as('px')
-    var svgHead = '<svg xmlns="http://www.w3.org/2000/svg" '
-    svgHead += ('width="' + docWidth + '" height="' + docHeight + '" ')
-    svgHead += ('viewBox="0 0 ' + docWidth + ' ' +  docHeight + '" ')
-    svgHead += 'xmlns:xlink="http://www.w3.org/1999/xlink">'
+    var svgHead = '<svg xmlns="http://www.w3.org/2000/svg"'
+    svgHead += ' xmlns:xlink="http://www.w3.org/1999/xlink"'
+    svgHead += (' viewBox="0 0 ' + docWidth + ' ' +  docHeight + '"')
+    svgHead += '>'
     textBody.unshift(svgHead)
     textBody.push('</svg>')
     // 拼合字符串
     var text = textBody.join('\n')
 
     // 写入文本文件, 成功后关闭文件的输入流。
-    htmlOut.write(text)
-    htmlOut.close()
+    svgOut.write(text)
+    svgOut.close()
 
 }
 
