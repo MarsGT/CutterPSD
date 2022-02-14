@@ -28,7 +28,7 @@
 除了默认的 cutter.jsx 脚本外，本项目额外增加了两个cutter2...脚本，其中：
    - cutter2js.jsx 用于生成适合 Phaser3 引擎使用的 Scene 的 js 文件
    - cutter2html.jsx 用于生成适合 Swiper5 使用的 HTML 模板
-   - cutter2svg.jsx 用于生成多个 image 组合式的 SVG 图片
+   - cutter2svg.jsx 用于生成多个 image 组合式的 SVG 图片 (不导出图片，导出图片建议直接使用 Photoshop 的“导出为...”功能)
 
 还附带有一个 exportText.jsx 文件，用于将当前选中的文本图层中的文字内容导出到 TXT 文件。
 
