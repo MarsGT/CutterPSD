@@ -24,12 +24,12 @@ var processing = function (exFolder) {
     var i, layer, x, x2, y, y2, layerName, width, height
     var svgTmp = ''
     for (i = 0; i < len; i++) {
-        // 跳过隐藏图层
-        if (!layers[i].visible) {
-            continue;
-        }
         // 图层缓存
         layer = layers[i]
+        // 跳过隐藏图层
+        if (!layer.visible) {
+            continue
+        }
         // 拿到包围框信息
         x = UnitValue(layer.bounds[0]).as('px')
         y = UnitValue(layer.bounds[1]).as('px')
@@ -39,20 +39,35 @@ var processing = function (exFolder) {
         layerName = layer.name
         width = x2 - x
         height = y2 - y
-        // 生成写入内容
-        svgTmp = '<image xlink:href="images/'
-        svgTmp += layerName
-        svgTmp += '.png'
-        svgTmp += '" x="'
-        svgTmp += x
-        svgTmp += '" y="'
-        svgTmp += y
-        svgTmp += '" width="'
-        svgTmp += width
-        svgTmp += '" height="'
-        svgTmp += height
-        svgTmp += '" />'
-        textBody.push(svgTmp)
+        // 判断图层类型,生成相应的内容(图片或文本)
+        if (layer.kind == LayerKind.TEXT) {
+            svgTmp = '<text x="'
+            svgTmp += x
+            svgTmp += '" y="'
+            svgTmp += y
+            svgTmp += '" width="'
+            svgTmp += width
+            svgTmp += '" height="'
+            svgTmp += height
+            svgTmp += '">'
+            svgTmp += layer.textItem.contents
+            svgTmp += '</text>'
+            textBody.push(svgTmp)
+        } else {
+            svgTmp = '<image xlink:href="images/'
+            svgTmp += layerName
+            svgTmp += '.png'
+            svgTmp += '" x="'
+            svgTmp += x
+            svgTmp += '" y="'
+            svgTmp += y
+            svgTmp += '" width="'
+            svgTmp += width
+            svgTmp += '" height="'
+            svgTmp += height
+            svgTmp += '" />'
+            textBody.push(svgTmp)
+        }
     }
     // 处理头尾
     var docWidth = UnitValue(app.activeDocument.width).as('px'),
