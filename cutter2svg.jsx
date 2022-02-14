@@ -61,6 +61,7 @@ var processing = function (exFolder) {
     svgHead += ' xmlns:xlink="http://www.w3.org/1999/xlink"'
     svgHead += (' viewBox="0 0 ' + docWidth + ' ' + docHeight + '"')
     svgHead += '>'
+    textBody.reverse(); // 颠倒顺序,按自然层级排列
     textBody.unshift(svgHead)
     textBody.push('</svg>')
     // 拼合字符串
