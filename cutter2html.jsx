@@ -8,8 +8,15 @@ app.preferences.rulerUnits = Units.PIXELS
 app.bringToFront()
 
 /* 全局文档名 */
-var psdName = app.activeDocument.name.replace(".psd", "")
-
+var outNamePre = app.activeDocument.name.match(/P\d{2,4}(_\d)?/) || 'Pzzzz'
+// 命名规则: 多页,以大写字母P开头, 支持2位/3位数字序号, 增补页以_1形式出现, 如P01_1、P01_2等
+// 4位数字第1位数字标识哪个部分, 第2、3位数字标识是这个部分的第几页,
+// 第3位数字从0开始, 预留给之后修订时要增加的页(防止切出组件命名重复), 如P2020、P2030中间再加页就是P2021、P2022、P2023并以此类推
+// 几种推荐形式范例: [P02.设计稿名称.psd]、[P02_1.设计稿名称.psd]、[P045.设计稿名称.psd]、[P0290.设计稿名称.psd]、[P0291.设计稿名称.psd]
+/* 输出文件夹 */
+var outFolder = "/item/"
+/* 用于随机的动画名 */
+var animateLib = ["fadeInDown", "fadeInLeft", "fadeInUp", "fadeInRight", "slideInDown", "slideInLeft", "slideInUp", "slideInRight", "zoomIn"]
 /* 生成指定位数的序列号（填充0） */
 function zeroSuppress(num, digit) {
     var tmp = num.toString()
@@ -71,7 +78,7 @@ function processing(exFolder) {
         height = y2 - y1
         // 文件名
         fileIndex++
-        name = 'item_' + zeroSuppress(fileIndex, 3)
+        name = zeroSuppress(fileIndex, 2)
         // 压入组件信息数组
         rectArr.push({
             name: name,
@@ -87,7 +94,7 @@ function processing(exFolder) {
         for (j = 1; j < layers.length; j++) {
             layers[j].visible = false
         }
-        savePNG(exFolder + "/item/", psdName + '_' + name, {
+        savePNG(exFolder + outFolder, outNamePre + '.' + name, {
             x1: x1,
             y1: y1,
             x2: x2,
@@ -118,12 +125,18 @@ function exportHTML(rectArr, exFolder) {
         htmlOut.open("a") // 追加模式
     }
 
-    var text = "<section class='swiper-slide' style='overflow:hidden;' data-header>\n\t<div class='pageZoom'>\n" // 待写入内容的字符串
+    var text = ""
+    text += "<section class='swiper-slide' style='overflow:hidden;' data-music data-bg='1'>\n"
+    text += "\t<div class='pageZoom noTop'>\n"
+    // text += "\t\t<img class='imgBase' src='assets/common/bgHeader.png' style='left:0;top:0;'>\n"
+    text += "\t\t<img class='imgBase' src='assets/common/header.png' style='left:0;top:0;'>\n"
+    // text += "\t\t<img class='imgBase' src='assets/common/goback.png' style='left:164px;top:177px;' data-goback>\n"
+    text += "\t</div>\n"
+    text += "\t<div class='pageZoom'>\n" // 待写入内容的字符串
     var textBody = [] // 待写入内容缓存
 
     var imageTmp = ""
     var len = rectArr.length
-    var animateLib = ["fadeInDown", "fadeInLeft", "fadeInUp", "fadeInRight", "slideInDown", "slideInLeft", "slideInUp", "slideInRight", "zoomIn"]
 
     for (var i = 0; i < len; i++) {
         imageTmp = "\t\t<img class='imgBase swiper-lazy"
@@ -138,7 +151,7 @@ function exportHTML(rectArr, exFolder) {
                 imageTmp += " ani' data-src='"
                 break;
         }
-        imageTmp += "assets/item/" + psdName + '_' + rectArr[i].name + ".png"
+        imageTmp += "assets" + outFolder + outNamePre + '.' + rectArr[i].name + ".png"
         imageTmp += "' style='left:" + rectArr[i].x + "px;top:" + rectArr[i].y + "px;"
         if (rectArr[i].layerName === '[pointer]') {
             imageTmp += "pointer-events:auto;'"
@@ -174,8 +187,6 @@ function exportHTML(rectArr, exFolder) {
         }
         textBody.push(imageTmp)
     }
-    textBody.push("\t\t<img class='imgBase swiper-lazy' data-src='assets/common/goback.png' style='left:72px;top:147px;pointer-events:all;' data-goback>")
-    textBody.push("\t\t<img class='imgBase swiper-lazy' data-src='assets/common/header.png' style='left:0;top:0;'>")
     textBody.reverse(); // 颠倒顺序,按自然层级排列
 
     text += textBody.join('\n')
