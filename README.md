@@ -23,9 +23,7 @@
 
 ## 关于脚本功能的简单介绍
 
-默认为 cutter.jsx 脚本，会进行切图以及生成 config.json 配置文件(内容为图片大小及定位信息)
-
-除了默认的 cutter.jsx 脚本外，本项目额外增加了两个cutter2...脚本，其中：
+本项目中主要是各种cutter2xxx脚本，其中：
    - cutter2js.jsx 用于生成适合 Phaser3 引擎使用的 Scene 的 js 文件
    - cutter2html.jsx 用于生成适合 Swiper5 使用的 HTML 模板
    - cutter2svg.jsx 用于生成多个 image 组合式的 SVG 图片 (不导出图片，导出图片建议直接使用 Photoshop 的“导出为...”功能)
