@@ -7,7 +7,7 @@ app.preferences.rulerUnits = Units.PIXELS
 app.bringToFront()
 
 /* 全局文档名 */
-var outNamePre = app.activeDocument.name.match(/P\d{2,4}(_\d)?/) || 'Pzzzz'
+var outNamePre = app.activeDocument.name.match(/P\d{2,4}(_\d)?/)[0] || 'Pzzzz'
 // 命名规则: 多页,以大写字母P开头, 支持2位/3位数字序号, 增补页以_1形式出现, 如P01_1、P01_2等
 // 4位数字第1位数字标识哪个部分, 第2、3位数字标识是这个部分的第几页,
 // 第3位数字从0开始, 预留给之后修订时要增加的页(防止切出组件命名重复), 如P2020、P2030中间再加页就是P2021、P2022、P2023并以此类推
