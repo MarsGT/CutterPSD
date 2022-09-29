@@ -2,7 +2,6 @@
  * Created by Liangxiao on 17/7/6.
  */
 
-//@include "lib/json2.min.js"
 //@target photoshop
 app.preferences.rulerUnits = Units.PIXELS
 app.bringToFront()
@@ -14,7 +13,7 @@ var outNamePre = app.activeDocument.name.match(/P\d{2,4}(_\d)?/) || 'Pzzzz'
 // 第3位数字从0开始, 预留给之后修订时要增加的页(防止切出组件命名重复), 如P2020、P2030中间再加页就是P2021、P2022、P2023并以此类推
 // 几种推荐形式范例: [P02.设计稿名称.psd]、[P02_1.设计稿名称.psd]、[P045.设计稿名称.psd]、[P0290.设计稿名称.psd]、[P0291.设计稿名称.psd]
 /* 输出文件夹 */
-var outFolder = "/item/"
+var outFolder = "/item2/"
 /* 用于随机的动画名 */
 var animateLib = ["fadeInDown", "fadeInLeft", "fadeInUp", "fadeInRight", "slideInDown", "slideInLeft", "slideInUp", "slideInRight", "zoomIn"]
 /* 生成指定位数的序列号（填充0） */

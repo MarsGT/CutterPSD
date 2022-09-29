@@ -2,7 +2,6 @@
  * Created by Liangxiao on 17/7/6.
  */
 
-//@include "lib/json2.min.js"
 //@target photoshop
 app.preferences.rulerUnits = Units.PIXELS
 app.bringToFront()
