@@ -15,7 +15,7 @@ var outNamePre = app.activeDocument.name.match(/S?P\d{2,4}(_\d)?/)[0]
 // P前边可以加上S(业务需要), 导出的图片也同样会带
 // 另: 如果命名不符合以上规则, 可以直接自行设定固定值
 /* 输出文件夹 */
-var outFolder = "/item2/"
+var outFolder = "/item/"
 /* 用于随机的动画名 */
 var animateLib = ["fadeInDown", "fadeInLeft", "fadeInUp", "fadeInRight", "slideInDown", "slideInLeft", "slideInUp", "slideInRight", "zoomIn"]
 /* 生成指定位数的序列号（填充0） */
@@ -127,11 +127,12 @@ function exportHTML(rectArr, exFolder) {
     }
 
     var text = ""
-    text += "<section class='swiper-slide' style='overflow:hidden;' data-music data-bg='1'>\n"
+    text += "<section class='swiper-slide' style='overflow:hidden;' data-m='show' data-d='black'>\n"
+    // noTop为页眉(marginTop0)，主内容区适当加了些marginTop距离来适配小屏手机
     text += "\t<div class='pageZoom noTop'>\n"
     // text += "\t\t<img class='imgBase' src='assets/common/bgHeader.png' style='left:0;top:0;'>\n"
-    text += "\t\t<img class='imgBase' src='assets/common/header.png' style='left:0;top:0;'>\n"
-    // text += "\t\t<img class='imgBase' src='assets/common/goback.png' style='left:164px;top:177px;' data-goback>\n"
+    text += "\t\t<img class='imgBase' src='assets/common/header.png' style='left:0;top:158px;'>\n"
+    // text += "\t\t<img class='imgBase' src='assets/common/goback.png' style='left:70px;top:158px;' data-goback>\n"
     text += "\t</div>\n"
     text += "\t<div class='pageZoom'>\n" // 待写入内容的字符串
     var textBody = [] // 待写入内容缓存
