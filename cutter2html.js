@@ -7,11 +7,13 @@ app.preferences.rulerUnits = Units.PIXELS
 app.bringToFront()
 
 /* 全局文档名 */
-var outNamePre = app.activeDocument.name.match(/P\d{2,4}(_\d)?/)[0] || 'Pzzzz'
+var outNamePre = app.activeDocument.name.match(/S?P\d{2,4}(_\d)?/)[0]
 // 命名规则: 多页,以大写字母P开头, 支持2位/3位数字序号, 增补页以_1形式出现, 如P01_1、P01_2等
 // 4位数字第1位数字标识哪个部分, 第2、3位数字标识是这个部分的第几页,
 // 第3位数字从0开始, 预留给之后修订时要增加的页(防止切出组件命名重复), 如P2020、P2030中间再加页就是P2021、P2022、P2023并以此类推
 // 几种推荐形式范例: [P02.设计稿名称.psd]、[P02_1.设计稿名称.psd]、[P045.设计稿名称.psd]、[P0290.设计稿名称.psd]、[P0291.设计稿名称.psd]
+// P前边可以加上S(业务需要), 导出的图片也同样会带
+// 另: 如果命名不符合以上规则, 可以直接自行设定固定值
 /* 输出文件夹 */
 var outFolder = "/item2/"
 /* 用于随机的动画名 */
