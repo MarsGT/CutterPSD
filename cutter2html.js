@@ -170,6 +170,14 @@ function exportHTML(rectArr, exFolder) {
                     imageTmp += "fadeIn"
                     imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>"
                     break;
+                case "[Ani:zoomIn]":
+                    imageTmp += "zoomIn"
+                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0.2s'>"
+                    break;
+                case "[Ani:flipInX]":
+                    imageTmp += "flipInX"
+                    imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0.2s'>"
+                    break;
                 case "[Ani:fadeInUp]":
                     imageTmp += "fadeInUp";
                     imageTmp += "' swiper-animate-duration='0.6s' swiper-animate-delay='0s'>"
