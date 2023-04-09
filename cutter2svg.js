@@ -40,34 +40,19 @@ var processing = function (exFolder) {
         width = x2 - x
         height = y2 - y
         // 判断图层类型,生成相应的内容(图片或文本)
-        if (layer.kind == LayerKind.TEXT) {
-            svgTmp = '<text x="'
-            svgTmp += x
-            svgTmp += '" y="'
-            svgTmp += y
-            svgTmp += '" width="'
-            svgTmp += width
-            svgTmp += '" height="'
-            svgTmp += height
-            svgTmp += '">'
-            svgTmp += layer.textItem.contents
-            svgTmp += '</text>'
-            textBody.push(svgTmp)
-        } else {
-            svgTmp = '<image xlink:href="images/'
-            svgTmp += layerName
-            svgTmp += '.png'
-            svgTmp += '" x="'
-            svgTmp += x
-            svgTmp += '" y="'
-            svgTmp += y
-            svgTmp += '" width="'
-            svgTmp += width
-            svgTmp += '" height="'
-            svgTmp += height
-            svgTmp += '" />'
-            textBody.push(svgTmp)
-        }
+        svgTmp = '<image xlink:href="images/'
+        svgTmp += layerName
+        svgTmp += '.png'
+        svgTmp += '" x="'
+        svgTmp += x
+        svgTmp += '" y="'
+        svgTmp += y
+        svgTmp += '" width="'
+        svgTmp += width
+        svgTmp += '" height="'
+        svgTmp += height
+        svgTmp += '" />'
+        textBody.push(svgTmp)
     }
     // 处理头尾
     var docWidth = UnitValue(app.activeDocument.width).as('px'),
