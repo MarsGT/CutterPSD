@@ -6,7 +6,7 @@
 app.preferences.rulerUnits = Units.PIXELS
 app.bringToFront()
 
-var psdName = app.activeDocument.name.replace(".psd", "")
+var psdName = "p" + app.activeDocument.name.match(/^\d{2}/)[0]
 
 /* 存储PNG */
 function savePNG(path, name, crArr) {
@@ -81,9 +81,7 @@ function processing(exFolder) {
 
         try {
             layers[0].remove()
-        } catch (e) {
-            
-        }
+        } catch (e) { }
         cmp.apply() // 还原并删除备份
         cmp.remove()
     }
@@ -95,8 +93,9 @@ function exportJS(rectArr, exFolder) {
     var jsOut = new File(exFolder + "/" + psdName + ".js")
     jsOut.encoding = "UTF-8" // 强制指定编码
 
-    var text = "const " + psdName + " = new Phaser.Scene('" + psdName + "')\n\n" + psdName + ".create = function () {\n" // 待写入内容的字符串
+    var text = "{\n\tcreate() {\n\t\tconst " + psdName + " = this.add.container(0, 0)\n" // 待写入内容的字符串
     var textBody = [] // 待写入内容缓存
+    var textBody2 = [] // 待写入内容缓存
 
     if (!jsOut.exists) { // 如果指定的路径没有config.js文件
         jsOut.open("w") // 写入模式
@@ -106,13 +105,22 @@ function exportJS(rectArr, exFolder) {
     var len = rectArr.length
 
     for (var i = 0; i < len; i++) {
-        imageTmp = "\tthis.add.image(" + rectArr[i].cx + ", " + rectArr[i].cy + ", '" + psdName + "_" + rectArr[i].l + "')"
+        imageTmp = "\t\t" + psdName + ".add(this.add.image(" + rectArr[i].cx + ", " + rectArr[i].cy + ", '" + psdName + "_" + rectArr[i].l + "'))"
         textBody.push(imageTmp)
     }
     textBody.reverse() // 颠倒顺序,按自然层级排列
 
+    var imageTmp2 = ""
+    for (var j = 0; j < len; j++) {
+        imageTmp2 = "\t\tthis.load.image('" + psdName + "_" + rectArr[j].l + "', require('./" + psdName + "/" + rectArr[j].l + ".png'))"
+        textBody2.push(imageTmp2)
+    }
+    textBody2.reverse() // 颠倒顺序,按自然层级排列
+
     text += textBody.join('\n')
-    text += "\n}\n"
+    text += '\n'
+    text += textBody2.join('\n')
+    text += "\n\t}\n}\n"
 
     // 写入到文本文件里
     jsOut.write(text)
