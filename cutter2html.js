@@ -57,7 +57,7 @@ function savePNG(path, name, imgConf) {
 }
 
 /* 在工作文档中处理所有复制来的图层/组，如果是图层组就先合并，然后裁切并输出 */
-function processing(exFolder) {
+function main(exFolder) {
     var rectArr = [] // 组件信息数组，包含名称、定位和宽高
     var layers = app.activeDocument.layers
     var len = layers.length
@@ -212,7 +212,7 @@ function exportHTML(rectArr, exFolder) {
     try {
         var exFolder = Folder.selectDialog("请选择输出文件夹")
         if (exFolder != null) {
-            var rect = processing(exFolder.fsName)
+            var rect = main(exFolder.fsName)
             exportHTML(rect, exFolder.fsName)
             app.beep(); //成功后播放提示音
             app.activeDocument.close(SaveOptions.DONOTSAVECHANGES)
