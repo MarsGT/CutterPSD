@@ -7,13 +7,10 @@ app.preferences.rulerUnits = Units.PIXELS
 app.bringToFront()
 
 /* 全局文档名 */
-var outNamePre = app.activeDocument.name.match(/S?P\d{2,4}(_\d)?/)[0]
-// 命名规则: 多页,以大写字母P开头, 支持2位/3位数字序号, 增补页以_1形式出现, 如P01_1、P01_2等
-// 4位数字第1位数字标识哪个部分, 第2、3位数字标识是这个部分的第几页,
-// 第3位数字从0开始, 预留给之后修订时要增加的页(防止切出组件命名重复), 如P2020、P2030中间再加页就是P2021、P2022、P2023并以此类推
-// 几种推荐形式范例: [P02.设计稿名称.psd]、[P02_1.设计稿名称.psd]、[P045.设计稿名称.psd]、[P0290.设计稿名称.psd]、[P0291.设计稿名称.psd]
-// P前边可以加上S(业务需要), 导出的图片也同样会带
-// 另: 如果命名不符合以上规则, 可以直接自行设定固定值
+var outNamePre = app.activeDocument.name.match(/^P\d{2}/)[0]
+// 命名规则: 以大写字母P开头, 2位数字序号, 位数不足补0, 如P01、P02、P11等
+// 如果不符合以上规则，推荐用批量重命名工具自行在设计稿名称前追加,
+// 或者也可以在每次切图前自行改写此字符串
 /* 输出文件夹 */
 var outFolder = "/item/"
 /* 用于随机的动画名 */
@@ -98,7 +95,7 @@ function main(exFolder) {
             imageTmp += "top:" + (~~(y1 / 1500 * 10000) / 100) + "vh;"
         }
         // 是否需要处理事件(图层名包含`[Tap]`或者`[To:XXX]`)
-        if (layerName.match(/\[[Tt](ap|o:\S+)\]/) !== null) {
+        if (layerName.match(/\[[Tt](ap|o:[一-龥a-zA-Z]+)\]/) !== null) {
             imageTmp += "pointer-events:auto;'"
         } else {
             imageTmp += "'"
@@ -108,10 +105,10 @@ function main(exFolder) {
         // 动画设定(图层名包含形如`[Ani:XXXX]`
         // 其中`[Ani:icon]`是循环晃动的小Logo, `[Ani:no]`代表没有动画, 未标此值代表采用随机动画(默认)
         // 其余取值皆为动画名
-        if (layerName.match(/\[[Aa]ni:(\S+)\]/) !== null) {
-            if (layerName.match(/\[[Aa]ni:(\S+)\]/)[1] !== 'no') {
+        if (layerName.match(/\[[Aa]ni:([a-zA-Z]{2,})\]/) !== null) {
+            if (layerName.match(/\[[Aa]ni:([a-zA-Z]{2,})\]/)[1] !== 'no') {
                 imageTmp += " data-ani='"
-                imageTmp += layerName.match(/\[[Aa]ni:(\S+)\]/)[1]
+                imageTmp += layerName.match(/\[[Aa]ni:([a-zA-Z]{2,})\]/)[1]
                 imageTmp += "'"
             }
         } else {
@@ -120,9 +117,9 @@ function main(exFolder) {
             imageTmp += "'"
         }
         // 如果有跳转(图层名包含`[To:XXX]`, 比如目录图跳转, 可以配合在要跳转到的页面上加data-dist参数)
-        if (layerName.match(/\[[Tt]o:(\S+)\]/) !== null) {
+        if (layerName.match(/\[[Tt]o:([一-龥a-zA-Z]+)\]/) !== null) {
             imageTmp += " data-to='"
-            imageTmp += layerName.match(/\[[Tt]o:(\S+)\]/)[1]
+            imageTmp += layerName.match(/\[[Tt]o:([一-龥a-zA-Z]+)\]/)[1]
             imageTmp += "'"
         }
         // 封口,将拼好的单条字串放入缓存
