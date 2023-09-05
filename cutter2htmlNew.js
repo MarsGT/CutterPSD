@@ -87,15 +87,11 @@ function main(exFolder) {
         }
         // ------------ 生成单条<img>元素 ------------
         imageTmp = "\t<img class='imgBase swiper-lazy'"
-        // 图片样式
+        // 图片样式与定位。这里定位上Left采用vw单位，Top采用vh单位，
+        // 全部按比例后小屏幕机型只需要适当调整根节点font-size就行(控制图片width)
         imageTmp += " style='width:" + (width / 100) + "rem;"
-        imageTmp += "left:" + (x1 / 100) + "rem;"
-        // Top值是否使用vh单位，带有`[useRem]`标记的使用rem单位
-        // 一般应用于比如两个元素的差接近页面高1/3了，这时再用vh可能在小屏机型上会出现重叠
-        if (layerName.match(/\[[Uu]seRem\]/) !== null) {
-            imageTmp += "top:" + (y1 / 100) + "rem;"
-        } else {
-            imageTmp += "top:" + (~~(y1 / 1500 * 10000) / 100) + "vh;"
+        imageTmp += "left:" + (~~(x1 / 750 * 10000) / 100) + "vw;"
+        imageTmp += "top:" + (~~(y1 / 1500 * 10000) / 100) + "vh;"
         }
         // 是否需要处理事件(图层名包含`[Tap]`或者`[To:XXX]`)
         if (layerName.match(/\[[Tt](ap|o:[一-龥a-zA-Z]+)\]/) !== null) {
