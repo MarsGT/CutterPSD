@@ -101,7 +101,7 @@ function main(exFolder) {
             imageTmp += "'"
         }
         // 路径(改用了src, 因为目前的框架用data-src会不支持……)
-        imageTmp += "\n\t\t src='assets" + outFolder + outNamePre + '.' + name + ".png'"
+        imageTmp += "\n\t\t data-src='assets" + outFolder + outNamePre + '.' + name + ".png'"
         // 动画设定(图层名包含形如`[Ani:XXXX]`
         // 其中`[Ani:icon]`是循环晃动的小Logo, `[Ani:no]`代表没有动画, 未标此值代表采用随机动画(默认)
         // 其余取值皆为动画名
