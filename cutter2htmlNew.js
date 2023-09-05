@@ -48,13 +48,16 @@ function main(exFolder) {
     }
     // 待写入内容的字符串
     var text = ""
-    text += "<article class='swiper-slide' style='overflow:hidden;' data-icon='show' data-tips='black' data-bg='01'>\n"
+    text += "<article class='swiper-slide swiper-lazy' style='overflow:hidden;' data-icon='show' data-tips='black'\n"
+    text += "\t data-background='assets/bg.01.jpg'>\n"
     // data-icon为是否显示音乐图标[取值为show/hide]
     // data-tips为是否显示下拉提示[取值为none/black/golden/green等], 翻页时按各页设计处理(如适配不同颜色的下拉提示icon)
-    // data-bg为页面使用的背景图，一般在CSS里定义
+    // data-background为单个页面使用的背景图，用了懒加载所以直接给链接(bg-image)，
+    // CSS里需要注意提前设置好`article.swiper-lazy`的bg-repeat、bg-size和bg-color(如果背景透明的话)就行
+    // ---------------
     // 下面是一些(固定出现的)顶端元素
-    text += "\t<img class='imgBase swiper-lazy' data-logo src='assets/logo.png'>\n"
-    text += "\t<img class='imgBase swiper-lazy' data-title src='assets/title.png'>\n"
+    text += "\t<img class='imgBase swiper-lazy' data-logo data-src='assets/logo.png'>\n"
+    text += "\t<img class='imgBase swiper-lazy' data-title data-src='assets/title.png'>\n"
     // 待写入内容缓存
     var textBody = []
     // 用来拼接每条img的缓存
