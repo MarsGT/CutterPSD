@@ -92,7 +92,6 @@ function main(exFolder) {
         imageTmp += " style='width:" + (width / 100) + "rem;"
         imageTmp += "left:" + (~~(x1 / 750 * 10000) / 100) + "vw;"
         imageTmp += "top:" + (~~(y1 / 1500 * 10000) / 100) + "vh;"
-        }
         // 是否需要处理事件(图层名包含`[Tap]`或者`[To:XXX]`)
         if (layerName.match(/\[[Tt](ap|o:[一-龥a-zA-Z]+)\]/) !== null) {
             imageTmp += "pointer-events:auto;'"
