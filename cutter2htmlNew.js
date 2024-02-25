@@ -48,16 +48,25 @@ function main(exFolder) {
     }
     // 待写入内容的字符串
     var text = ""
-    text += "<article class='swiper-slide swiper-lazy' style='overflow:hidden;' data-icon='show' data-tips='black'\n"
-    text += "\t data-background='assets/bg.01.jpg'>\n"
+    // 页面最外层容器(包裹在<article>标签里), 这个是有背景元素的, 背景使用swiper预加载
+    text += "<article class='swiper-slide swiper-lazy' data-icon='show' data-tips='black' data-mu='black'\n"
+    text += "\t\t data-background='assets/bg.01.jpg'>\n"
+    // 页面最外层容器, 这个没有背景元素(只有背景色)
+    // text += "<article class='swiper-slide' data-icon='show' data-tips='blue' data-mu='blue'>\n"
+    // 属性解释:
     // data-icon为是否显示音乐图标[取值为show/hide]
+    // data-mu为音乐图标颜色[取值对应data-tools下data-music的相应颜色,具体定义写在CSS里]
     // data-tips为是否显示下拉提示[取值为none/black/golden/green等], 翻页时按各页设计处理(如适配不同颜色的下拉提示icon)
-    // data-background为单个页面使用的背景图，用了懒加载所以直接给链接(bg-image)，
-    // CSS里需要注意提前设置好`article.swiper-lazy`的bg-repeat、bg-size和bg-color(如果背景透明的话)就行
+    // data-background为单个页面使用的背景图，用了懒加载所以直接给链接(bg-image)就行
+    // CSS里需要注意提前设置好`article.swiper-lazy`的bg-repeat、bg-size
+    // 如果没有背景图片要注意设置bg-color
     // ---------------
-    // 下面是一些(固定出现的)顶端元素
-    text += "\t<img class='imgBase swiper-lazy' data-logo data-src='assets/logo.png'>\n"
-    text += "\t<img class='imgBase swiper-lazy' data-title data-src='assets/title.png'>\n"
+    // 页眉元素(包裹在<header>标签里)
+    text += "\t<header>\n"
+    text += "\t\t<img class='imgBase swiper-lazy' data-src='assets/header.1.png' data-header='1'>\n"/*页眉元素的定位使用data-header*/
+    text += "\t</header>\n"
+    // 页面主体内容(包裹在<section>标签里)
+    text += "\t<section>\n"
     // 待写入内容缓存
     var textBody = []
     // 用来拼接每条img的缓存
@@ -86,12 +95,12 @@ function main(exFolder) {
             layers[j].visible = false
         }
         // ------------ 生成单条<img>元素 ------------
-        imageTmp = "\t<img class='imgBase swiper-lazy'"
+        imageTmp = "\t\t<img class='imgBase swiper-lazy'"
         // 图片样式与定位。这里定位上Left采用vw单位，Top采用vh单位，
         // 全部按比例后小屏幕机型只需要适当调整根节点font-size就行(控制图片width)
-        imageTmp += " style='width:" + (width / 100) + "rem;"
+        imageTmp += " style='width:" + (~~(width / 750 * 10000) / 100) + "vw;"
         imageTmp += "left:" + (~~(x1 / 750 * 10000) / 100) + "vw;"
-        imageTmp += "top:" + (~~(y1 / 1500 * 10000) / 100) + "vh;"
+        imageTmp += "top:" + (~~(y1 / 750 * 10000) / 100 - 38.133/*即286px*/) + "vw;"
         // 是否需要处理事件(图层名包含`[Tap]`或者`[To:XXX]`)
         if (layerName.match(/\[[Tt](ap|o:[一-龥a-zA-Z]+)\]/) !== null) {
             imageTmp += "pointer-events:auto;'"
@@ -99,7 +108,7 @@ function main(exFolder) {
             imageTmp += "'"
         }
         // 路径(改用了src, 因为目前的框架用data-src会不支持……)
-        imageTmp += "\n\t\t data-src='assets" + outFolder + outNamePre + '.' + name + ".png'"
+        imageTmp += "\n\t\t\t data-src='assets" + outFolder + outNamePre + '.' + name + ".png'"
         // 动画设定(图层名包含形如`[Ani:XXXX]`
         // 其中`[Ani:icon]`是循环晃动的小Logo, `[Ani:no]`代表没有动画, 未标此值代表采用随机动画(默认)
         // 其余取值皆为动画名
@@ -167,6 +176,8 @@ function main(exFolder) {
     textBody.reverse()
     // 拼接后排入总体内容字符串
     text += textBody.join('\n')
+    // 关闭标签
+    text += "\n\t</section>"
     text += "\n</article>\n"
     // 写入文本文件, 成功后关闭文件的输入流。
     htmlOut.write(text)
