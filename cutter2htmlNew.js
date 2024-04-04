@@ -101,8 +101,7 @@ function main(exFolder) {
         }
         // ------------ 生成单条<img>元素 ------------
         imageTmp = "\t\t<img class='imgBase swiper-lazy'"
-        // 图片样式与定位。这里定位上Left采用vw单位，Top采用vh单位，
-        // 全部按比例后小屏幕机型只需要适当调整根节点font-size就行(控制图片width)
+        // 图片样式与定位。这里定位上均采用vw单位
         imageTmp += " style='width:" + (~~(width / 750 * 10000) / 100) + "vw;"
         imageTmp += "left:" + (~~(x1 / 750 * 10000) / 100) + "vw;"
         imageTmp += "top:" + (~~((y1 - 286)/*即header高度*/ / 750 * 10000) / 100) + "vw;"
