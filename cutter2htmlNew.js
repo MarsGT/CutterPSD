@@ -1,14 +1,11 @@
-/**
- * Created by Liangxiao on 17/7/6.
- */
-
 //@target photoshop
 app.preferences.rulerUnits = Units.PIXELS
 app.bringToFront()
 
 /* 全局文档名 */
-var outNamePre = app.activeDocument.name.match(/^P\d{2}/)[0]
-// 命名规则: 以大写字母P开头, 2位数字序号, 位数不足补0, 如P01、P02、P11等
+var outNamePre = app.activeDocument.name.match(/S?P\d{2}(_\d)?/)[0]
+// 命名规则: 以大写字母P开头, 2位数字序号, 位数不足补0, 前边可以加S, 后边可以跟下划线加1位数字,
+// 比如P01、P02、SP11、SP04_3、P21_4等都是合法名称
 // 如果不符合以上规则，推荐用批量重命名工具自行在设计稿名称前追加,
 // 或者也可以在每次切图前自行改写此字符串
 /* 输出文件夹 */
@@ -48,22 +45,30 @@ function main(exFolder) {
     }
     // 待写入内容的字符串
     var text = ""
-    // 页面最外层容器(包裹在<article>标签里), 这个是有背景元素的, 背景使用swiper预加载
-    text += "<article class='swiper-slide swiper-lazy' data-icon='show' data-tips='black' data-mu='black'\n"
+    // 页面最外层容器(页面包裹在<article>标签里)
+    // 形式1: 含有背景图的页面, 背景使用swiper预加载
+    text += "<article class='swiper-slide swiper-lazy' data-icon='show' data-tips='orange' data-mu='white'\n"
     text += "\t\t data-background='assets/bg.01.jpg'>\n"
-    // 页面最外层容器, 这个没有背景元素(只有背景色)
-    // text += "<article class='swiper-slide' data-icon='show' data-tips='blue' data-mu='blue'>\n"
+    // 形式2: 有背景色的页面
+    // text += "<article class='swiper-slide' data-icon='show' data-tips='black' data-mu='white'\n"
+    // text += "\t\t style='background-color:#f3f3f1;'>\n"
+    // 形式3: 不含背景图也没有背景色的页面
+    // text += "<article class='swiper-slide' data-icon='show' data-tips='orange' data-mu='white'>\n"
     // 属性解释:
     // data-icon为是否显示音乐图标[取值为show/hide]
     // data-mu为音乐图标颜色[取值对应data-tools下data-music的相应颜色,具体定义写在CSS里]
     // data-tips为是否显示下拉提示[取值为none/black/golden/green等], 翻页时按各页设计处理(如适配不同颜色的下拉提示icon)
-    // data-background为单个页面使用的背景图，用了懒加载所以直接给链接(bg-image)就行
+    // data-background为单个页面使用的背景图，用了懒加载所以直接写背景图片的链接就行
     // CSS里需要注意提前设置好`article.swiper-lazy`的bg-repeat、bg-size
-    // 如果没有背景图片要注意设置bg-color
     // ---------------
     // 页眉元素(包裹在<header>标签里)
+    // 形式1: 普通页眉
     text += "\t<header>\n"
-    text += "\t\t<img class='imgBase swiper-lazy' data-src='assets/header.1.png' data-header='1'>\n"/*页眉元素的定位使用data-header*/
+    // 形式2: 需要提高页眉层级以避免被下方页面内容遮挡
+    // text += "\t<header style='z-index:9;'>\n"
+    text += "\t\t<img class='imgBase swiper-lazy' data-src='assets/logo.1.png' data-logo='1'>\n"
+    text += "\t\t<img class='imgBase swiper-lazy' data-src='assets/title.1.png' data-title='1'>\n"
+    // text += "\t\t<img class='imgBase swiper-lazy' data-src='assets/btnGoback.png' data-goback>\n"
     text += "\t</header>\n"
     // 页面主体内容(包裹在<section>标签里)
     text += "\t<section>\n"
@@ -100,15 +105,18 @@ function main(exFolder) {
         // 全部按比例后小屏幕机型只需要适当调整根节点font-size就行(控制图片width)
         imageTmp += " style='width:" + (~~(width / 750 * 10000) / 100) + "vw;"
         imageTmp += "left:" + (~~(x1 / 750 * 10000) / 100) + "vw;"
-        imageTmp += "top:" + (~~(y1 / 750 * 10000) / 100 - 38.133/*即286px*/) + "vw;"
+        imageTmp += "top:" + (~~((y1 - 286)/*即header高度*/ / 750 * 10000) / 100) + "vw;"
         // 是否需要处理事件(图层名包含`[Tap]`或者`[To:XXX]`)
         if (layerName.match(/\[[Tt](ap|o:[一-龥a-zA-Z]+)\]/) !== null) {
             imageTmp += "pointer-events:auto;'"
         } else {
             imageTmp += "'"
         }
-        // 路径(改用了src, 因为目前的框架用data-src会不支持……)
-        imageTmp += "\n\t\t\t data-src='assets" + outFolder + outNamePre + '.' + name + ".png'"
+        // 路径, data-src是因为用到了懒加载
+        // 另外由于现在基本不存在兼容性问题了, 切出来的PNG图片建议使用XnConvert批量转换为WebP格式
+        // 把输出文件夹里的图片拖到XnConvert的“输入”里, 动作不用管, 直接到输出里设置输出文件夹, 文件名{Filename}大小写不转换,
+        // 选项只勾保留颜色设置和使用多核(拉满), “转换完毕之后”的“清除输入文件”可以勾, 格式选WEBP, 在下边设置里质量设置85就行, 然后把下边的RGB->YUV勾上就行了
+        imageTmp += "\n\t\t\t data-src='assets" + outFolder + outNamePre + '.' + name + ".webp'"
         // 动画设定(图层名包含形如`[Ani:XXXX]`
         // 其中`[Ani:icon]`是循环晃动的小Logo, `[Ani:no]`代表没有动画, 未标此值代表采用随机动画(默认)
         // 其余取值皆为动画名
