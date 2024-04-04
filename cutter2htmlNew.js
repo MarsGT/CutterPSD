@@ -47,13 +47,21 @@ function main(exFolder) {
     var text = ""
     // 页面最外层容器(页面包裹在<article>标签里)
     // 形式1: 含有背景图的页面, 背景使用swiper预加载
+<<<<<<< HEAD
     text += "<article class='swiper-slide swiper-lazy' data-icon='show' data-tips='black' data-mu='white'\n"
+=======
+    text += "<article class='swiper-slide swiper-lazy' data-icon='show' data-tips='orange' data-mu='white'\n"
+>>>>>>> 665c4d35b6351e4377ba1b1a3080ca167c14e7ec
     text += "\t\t data-background='assets/bg.01.jpg'>\n"
     // 形式2: 有背景色的页面
     // text += "<article class='swiper-slide' data-icon='show' data-tips='black' data-mu='white'\n"
     // text += "\t\t style='background-color:#f3f3f1;'>\n"
     // 形式3: 不含背景图也没有背景色的页面
+<<<<<<< HEAD
     // text += "<article class='swiper-slide' data-icon='show' data-tips='black' data-mu='white'>\n"
+=======
+    // text += "<article class='swiper-slide' data-icon='show' data-tips='orange' data-mu='white'>\n"
+>>>>>>> 665c4d35b6351e4377ba1b1a3080ca167c14e7ec
     // 属性解释:
     // data-icon为是否显示音乐图标[取值为show/hide]
     // data-mu为音乐图标颜色[取值对应data-tools下data-music的相应颜色,具体定义写在CSS里]
